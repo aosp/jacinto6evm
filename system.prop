@@ -1,0 +1,4 @@
+wifi.interface=wlan0
+com.ti.omap_enhancement=true
+persist.hwc.primary.tv=1
+com.ti.nfcti_enhancement=true
