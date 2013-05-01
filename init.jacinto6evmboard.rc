@@ -34,6 +34,7 @@ on post-fs-data
 
 on boot
 	mount debugfs /sys/kernel/debug /sys/kernel/debug
+	insmod /system/lib/modules/pvrsrvkm_sgx544_116.ko
 	chmod 0666 /dev/pvrsrvkm
 
 # wi-fi
@@ -48,7 +49,7 @@ on boot
 
 on fs
 	mkdir /factory 0775 radio radio
-	mount_all /fstab.jacinto6evm
+#	mount_all /fstab.jacinto6evm
 
 # change permissions for Bluetooth/FM/GPS
     chmod 0660 /dev/ttyO4
