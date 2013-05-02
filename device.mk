@@ -29,7 +29,7 @@ PRODUCT_COPY_FILES := \
 	device/ti/jacinto6evm/fstab.jacinto6evm:root/fstab.jacinto6evm \
 	device/ti/jacinto6evm/media_profiles.xml:system/etc/media_profiles.xml \
 	device/ti/jacinto6evm/media_codecs.xml:system/etc/media_codecs.xml \
-	device/ti/common-open/audio/audio_policy.conf:system/etc/audio_policy.conf \
+	device/ti/jacinto6evm/audio/audio_policy.conf:system/etc/audio_policy.conf \
 	frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml \
 	frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
