@@ -48,6 +48,11 @@ on boot
 	insmod /system/lib/modules/wl18xx.ko board_type=hdk
 
 on fs
+	mkdir /dev/usb-ffs 0770 shell shell
+	mkdir /dev/usb-ffs/adb 0770 shell shell
+	mount functionfs adb /dev/usb-ffs/adb uid=2000,gid=2000
+	write /sys/class/android_usb/android0/f_ffs/aliases adb
+
 	mkdir /factory 0775 radio radio
 #	mount_all /fstab.jacinto6evm
 
