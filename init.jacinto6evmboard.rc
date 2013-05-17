@@ -23,6 +23,10 @@ on init
     mkdir /storage/usb1 0000 system system
 
 on post-fs-data
+    # HACK: for SD card boot mounting rootfs as rw and setuid for su
+    mount rootfs rootfs / rw remount
+    chmod 6755 /system/xbin/su
+
     mkdir /data/media 0770 media_rw media_rw
 
     setprop vold.post_fs_data_done 1
@@ -34,6 +38,8 @@ on post-fs-data
 
 on boot
     mount debugfs /sys/kernel/debug /sys/kernel/debug
+    # HACK: insmod gfx module for SD card boot
+    insmod /system/lib/modules/pvrsrvkm_sgx544_116.ko
     chmod 0666 /dev/pvrsrvkm
 
 # wi-fi
@@ -48,7 +54,8 @@ on boot
 
 on fs
     mkdir /factory 0775 radio radio
-    mount_all /fstab.jacinto6evm
+    # HACK: Commenting out for SD card boot support
+    #mount_all /fstab.jacinto6evm
 
 # Make UART wake up capable
     write /sys/devices/ocp.2/4806a000.serial/tty/ttyO0/power/wakeup enabled
