@@ -44,7 +44,7 @@ BOARD_KERNEL_CMDLINE := console=ttyO2,115200n8 mem=1024M androidboot.console=tty
 
 TARGET_NO_RADIOIMAGE := true
 TARGET_BOARD_PLATFORM := omap5
-TARGET_BOOTLOADER_BOARD_NAME := panda5
+TARGET_BOOTLOADER_BOARD_NAME := jacinto6evm
 
 BOARD_EGL_CFG := device/ti/jacinto6evm/egl.cfg
 
