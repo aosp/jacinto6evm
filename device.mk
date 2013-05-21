@@ -93,8 +93,8 @@ PRODUCT_PACKAGES += \
     camera_test
 
 # Audio HAL module
-PRODUCT_PACKAGES += audio.primary.omap5
-PRODUCT_PACKAGES += audio.hdmi.omap5
+PRODUCT_PACKAGES += audio.primary.jacinto6
+PRODUCT_PACKAGES += audio.hdmi.jacinto6
 
 # Audioout libs
 PRODUCT_PACKAGES += libaudioutils
@@ -119,10 +119,10 @@ PRODUCT_PACKAGES += \
 	hcitool
 
 $(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
-$(call inherit-product-if-exists, hardware/ti/omap4xxx/omap5.mk)
+$(call inherit-product-if-exists, hardware/ti/omap4xxx/jacinto6.mk)
 $(call inherit-product-if-exists, hardware/ti/wpan/ti-wpan-products.mk)
 $(call inherit-product-if-exists, vendor/ti/omap5sevm/device-vendor.mk)
-$(call inherit-product-if-exists, device/ti/proprietary-open/omap5/ti-omap5-vendor.mk)
+$(call inherit-product-if-exists, device/ti/proprietary-open/omap5/ti-jacinto6-vendor.mk)
 $(call inherit-product-if-exists, device/ti/common-open/s3d/s3d-products.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/omap5/ducati-full_omap5panda.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/wl12xx/wlan/wl12xx-wlan-fw-products.mk)

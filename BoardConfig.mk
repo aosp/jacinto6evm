@@ -43,7 +43,7 @@ BOARD_KERNEL_BASE := 0x80000000
 BOARD_KERNEL_CMDLINE := console=ttyO2,115200n8 mem=1024M androidboot.console=ttyO2 androidboot.hardware=jacinto6evmboard vram=20M omapfb.vram=0:16M
 
 TARGET_NO_RADIOIMAGE := true
-TARGET_BOARD_PLATFORM := omap5
+TARGET_BOARD_PLATFORM := jacinto6
 TARGET_BOOTLOADER_BOARD_NAME := jacinto6evm
 
 BOARD_EGL_CFG := device/ti/jacinto6evm/egl.cfg
