@@ -22,10 +22,12 @@ on init
     mkdir /storage/usb0 0000 system system
     mkdir /storage/usb1 0000 system system
 
-on post-fs-data
+on post-fs
     # HACK: for SD card boot mounting rootfs as rw and setuid for su
     mount rootfs rootfs / rw remount
     chmod 6755 /system/xbin/su
+
+on post-fs-data
 
     mkdir /data/media 0770 media_rw media_rw
 
