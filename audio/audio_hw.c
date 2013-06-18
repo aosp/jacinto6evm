@@ -98,6 +98,7 @@ struct j6_stream_out {
 
 
 static const char *supported_cards[] = {
+    "dra7evm",
     "VayuEVM",
 };
 
