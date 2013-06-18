@@ -106,6 +106,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
 	TIMultiDisplay
 
+# Enable AAC 5.1 decode (decoder)
+PRODUCT_PROPERTY_OVERRIDES += \
+	media.aac_51_output_enabled=true
+
 $(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
 $(call inherit-product-if-exists, hardware/ti/omap4xxx/jacinto6.mk)
 #$(call inherit-product-if-exists, hardware/ti/wpan/ti-wpan-products.mk)
