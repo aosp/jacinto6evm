@@ -57,7 +57,7 @@ on boot
 on fs
     mkdir /factory 0775 radio radio
     # HACK: Commenting out for SD card boot support
-    #mount_all /fstab.jacinto6evm
+    #mount_all /fstab.jacinto6evmboard
 
 # Make UART wake up capable
     write /sys/devices/ocp.2/4806a000.serial/tty/ttyO0/power/wakeup enabled

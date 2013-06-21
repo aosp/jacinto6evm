@@ -26,7 +26,7 @@ PRODUCT_COPY_FILES := \
 	device/ti/jacinto6evm/init.jacinto6evmboard.rc:root/init.jacinto6evmboard.rc \
 	device/ti/jacinto6evm/init.jacinto6evmboard.usb.rc:root/init.jacinto6evmboard.usb.rc \
 	device/ti/jacinto6evm/ueventd.jacinto6evmboard.rc:root/ueventd.jacinto6evmboard.rc \
-	device/ti/jacinto6evm/fstab.jacinto6evm:root/fstab.jacinto6evm \
+	device/ti/jacinto6evm/fstab.jacinto6evmboard:root/fstab.jacinto6evmboard \
 	device/ti/jacinto6evm/media_profiles.xml:system/etc/media_profiles.xml \
 	device/ti/jacinto6evm/media_codecs.xml:system/etc/media_codecs.xml \
 	device/ti/jacinto6evm/audio/audio_policy.conf:system/etc/audio_policy.conf \
