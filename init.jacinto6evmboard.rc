@@ -1,5 +1,8 @@
 import init.jacinto6evmboard.usb.rc
 
+on early-init
+    mount debugfs /sys/kernel/debug /sys/kernel/debug
+
 on init
     mkdir /mnt/shell/emulated 0700 shell shell
     mkdir /storage/emulated 0555 root root
@@ -39,12 +42,11 @@ on post-fs-data
     chmod 0666 /dev/uhid
 
 on boot
-    mount debugfs /sys/kernel/debug /sys/kernel/debug
     # HACK: insmod gfx module for SD card boot
     insmod /system/lib/modules/pvrsrvkm_sgx544_116.ko
     chmod 0666 /dev/pvrsrvkm
 
-# wi-fi
+    # wi-fi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     insmod /system/lib/modules/compat.ko
