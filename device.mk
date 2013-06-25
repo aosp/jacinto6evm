@@ -89,9 +89,9 @@ PRODUCT_PACKAGES += \
 	wlconf
 
 PRODUCT_PACKAGES += \
-    CameraOMAP \
-    Camera \
-    camera_test
+	CameraOMAP \
+	Camera \
+	camera_test
 
 # Audio HAL module
 PRODUCT_PACKAGES += audio.primary.jacinto6
@@ -114,21 +114,16 @@ PRODUCT_PACKAGES += \
 # BlueZ a2dp Audio HAL module
 PRODUCT_PACKAGES += audio.a2dp.default
 
-# BlueZ test tools & Shared Transport user space mgr
-PRODUCT_PACKAGES += \
-	hciconfig \
-	hcitool
-
 # MultiDisplay
 PRODUCT_PACKAGES += \
-    TIMultiDisplay
+	TIMultiDisplay
 
 $(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
 $(call inherit-product-if-exists, hardware/ti/omap4xxx/jacinto6.mk)
-$(call inherit-product-if-exists, hardware/ti/wpan/ti-wpan-products.mk)
+#$(call inherit-product-if-exists, hardware/ti/wpan/ti-wpan-products.mk)
 $(call inherit-product-if-exists, vendor/ti/omap5sevm/device-vendor.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/jacinto6/ti-jacinto6-vendor.mk)
-$(call inherit-product-if-exists, device/ti/common-open/s3d/s3d-products.mk)
-$(call inherit-product-if-exists, device/ti/proprietary-open/omap5/ducati-full_omap5panda.mk)
+#$(call inherit-product-if-exists, device/ti/common-open/s3d/s3d-products.mk)
+#$(call inherit-product-if-exists, device/ti/proprietary-open/omap5/ducati-full_omap5panda.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/wl12xx/wlan/wl12xx-wlan-fw-products.mk)
-$(call inherit-product-if-exists, device/ti/proprietary-open/wl12xx/wpan/wl12xx-wpan-fw-products.mk)
+#$(call inherit-product-if-exists, device/ti/proprietary-open/wl12xx/wpan/wl12xx-wpan-fw-products.mk)
