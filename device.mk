@@ -46,7 +46,6 @@ PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
 
 PRODUCT_PACKAGES := \
-	make_ext4fs \
 	e2fsck
 
 PRODUCT_PROPERTY_OVERRIDES := \
@@ -66,16 +65,13 @@ DEVICE_PACKAGE_OVERLAYS := \
 PRODUCT_TAGS += dalvik.gc.type-precise
 
 PRODUCT_PACKAGES += \
-	librs_jni \
 	com.android.future.usb.accessory
-
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.sf.lcd_density=160
 
 # WI-Fi
 PRODUCT_PACKAGES += \
-	dhcpcd.conf \
 	hostapd.conf \
 	wifical.sh \
 	TQS_D_1.7.ini \
@@ -92,9 +88,6 @@ PRODUCT_PACKAGES += \
 # Audio HAL module
 PRODUCT_PACKAGES += audio.primary.jacinto6
 PRODUCT_PACKAGES += audio.hdmi.jacinto6
-
-# Audioout libs
-PRODUCT_PACKAGES += libaudioutils
 
 PRODUCT_PACKAGES += \
 	tinymix \
