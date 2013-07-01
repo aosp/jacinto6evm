@@ -85,9 +85,11 @@ PRODUCT_PACKAGES += \
 	Camera \
 	camera_test
 
-# Audio HAL module
+# Audio HAL modules
 PRODUCT_PACKAGES += audio.primary.jacinto6
 PRODUCT_PACKAGES += audio.hdmi.jacinto6
+# BlueDroid a2dp Audio HAL module
+PRODUCT_PACKAGES += audio.a2dp.default
 
 PRODUCT_PACKAGES += \
 	tinymix \
@@ -99,9 +101,6 @@ PRODUCT_PACKAGES += \
 	libboardidentity \
 	libboard_idJNI \
 	Board_id
-
-# BlueZ a2dp Audio HAL module
-PRODUCT_PACKAGES += audio.a2dp.default
 
 # MultiDisplay
 PRODUCT_PACKAGES += \
