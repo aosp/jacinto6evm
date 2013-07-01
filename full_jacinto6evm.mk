@@ -21,10 +21,6 @@
 # lines, full and toro, hence its name.
 #
 
-PRODUCT_PROPERTY_OVERRIDES := \
-        net.dns1=8.8.8.8 \
-        net.dns2=8.8.4.4
-
 # Inherit from those products. Most specific first.
 $(call inherit-product, device/ti/jacinto6evm/device.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
