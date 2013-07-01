@@ -47,8 +47,7 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PACKAGES := \
 	make_ext4fs \
-	e2fsck \
-	com.android.future.usb.accessory
+	e2fsck
 
 PRODUCT_PROPERTY_OVERRIDES := \
 	hwui.render_dirty_regions=false
@@ -70,9 +69,6 @@ PRODUCT_PACKAGES += \
 	librs_jni \
 	com.android.future.usb.accessory
 
-# Filesystem management tools
-PRODUCT_PACKAGES += \
-	make_ext4fs
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.sf.lcd_density=160
