@@ -157,6 +157,12 @@ struct pcm_config pcm_config_playback = {
 /* Line-In specific */
 #define MIXER_LEFT_PGA_LINE1L_SWITCH    "Left PGA Mixer Line1L Switch"
 #define MIXER_RIGHT_PGA_LINE1R_SWITCH   "Right PGA Mixer Line1R Switch"
+#define MIXER_LEFT_LINE1L_MUX           "Left Line1L Mux"
+#define MIXER_RIGHT_LINE1L_MUX          "Right Line1L Mux"
+#define MIXER_LEFT_LINE1R_MUX           "Left Line1R Mux"
+#define MIXER_RIGHT_LINE1R_MUX          "Right Line1R Mux"
+#define MIXER_LINE_IN_SINGLE_ENDED      "single-ended"
+#define MIXER_LINE_IN_DIFFERENTIAL      "differential"
 
 /* Playback */
 #define MIXER_LEFT_DAC_MUX              "Left DAC Mux"
@@ -175,9 +181,6 @@ struct pcm_config pcm_config_playback = {
 
 /* Line-Out specific */
 #define MIXER_LINE_PLAYBACK_SWITCH      "Line Playback Switch"
-#define MIXER_LEFT_LINE1L_MUX           "Left Line1L Mux"
-#define MIXER_RIGHT_LINE1L_MUX          "Right Line1L Mux"
-#define MIXER_LINE_OUT_SINGLE_ENDED     "single-ended"
 
 struct route_setting {
     char *ctl_name;
@@ -194,11 +197,13 @@ static struct route_setting rs_defaults[] = {
     /* Capture */
     RS_INT(MIXER_PGA_CAPTURE_SWITCH, 1),
     RS_INT(MIXER_PGA_CAPTURE_VOLUME, CAPTURE_DB_TO_VAL(12)), /* 12dB */
+    RS_STR(MIXER_LEFT_LINE1L_MUX, MIXER_LINE_IN_SINGLE_ENDED),
+    RS_STR(MIXER_RIGHT_LINE1L_MUX, MIXER_LINE_IN_SINGLE_ENDED),
+    RS_STR(MIXER_LEFT_LINE1R_MUX, MIXER_LINE_IN_SINGLE_ENDED),
+    RS_STR(MIXER_RIGHT_LINE1R_MUX, MIXER_LINE_IN_SINGLE_ENDED),
 
     /* Playback */
     RS_INT(MIXER_PCM_PLAYBACK_VOLUME, PLAYBACK_DB_TO_VAL(0)), /* 0dB */
-    RS_STR(MIXER_LEFT_LINE1L_MUX, MIXER_LINE_OUT_SINGLE_ENDED),
-    RS_STR(MIXER_RIGHT_LINE1L_MUX, MIXER_LINE_OUT_SINGLE_ENDED),
 };
 
 /* Capture switch used for mic mute */
