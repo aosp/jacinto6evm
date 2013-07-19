@@ -102,6 +102,14 @@ static const char *supported_cards[] = {
     "VayuEVM",
 };
 
+#define SUPPORTED_IN_DEVICES           (AUDIO_DEVICE_IN_BUILTIN_MIC | \
+                                        AUDIO_DEVICE_IN_WIRED_HEADSET | \
+                                        AUDIO_DEVICE_IN_DEFAULT)
+#define SUPPORTED_OUT_DEVICES          (AUDIO_DEVICE_OUT_SPEAKER | \
+                                        AUDIO_DEVICE_OUT_WIRED_HEADSET | \
+                                        AUDIO_DEVICE_OUT_WIRED_HEADPHONE | \
+                                        AUDIO_DEVICE_OUT_DEFAULT)
+
 #define CAPTURE_SAMPLE_RATE             44100
 #define CAPTURE_PERIOD_SIZE             320
 #define CAPTURE_PERIOD_COUNT            2
@@ -1207,18 +1215,7 @@ static int adev_dump(const audio_hw_device_t *device, int fd)
  */
 static uint32_t adev_get_supported_devices(const struct audio_hw_device *dev)
 {
-    uint32_t devices;
-
-    /* in */
-    devices = AUDIO_DEVICE_IN_BUILTIN_MIC |
-              AUDIO_DEVICE_IN_WIRED_HEADSET |
-              AUDIO_DEVICE_IN_DEFAULT;
-
-    /* out */
-    devices |= AUDIO_DEVICE_OUT_SPEAKER |
-               AUDIO_DEVICE_OUT_WIRED_HEADSET |
-               AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
-               AUDIO_DEVICE_OUT_DEFAULT;
+    uint32_t devices = SUPPORTED_IN_DEVICES | SUPPORTED_OUT_DEVICES;
 
     ALOGV("adev_get_supported_devices() devices=0x%08x", devices);
 
