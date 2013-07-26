@@ -25,11 +25,6 @@ on init
     mkdir /storage/usb0 0000 system system
     mkdir /storage/usb1 0000 system system
 
-on post-fs
-    # HACK: for SD card boot mounting rootfs as rw and setuid for su
-    mount rootfs rootfs / rw remount
-    chmod 6755 /system/xbin/su
-
 on post-fs-data
 
     mkdir /data/media 0770 media_rw media_rw
@@ -58,8 +53,7 @@ on boot
 
 on fs
     mkdir /factory 0775 radio radio
-    # HACK: Commenting out for SD card boot support
-    #mount_all /fstab.jacinto6evmboard
+    mount_all /fstab.jacinto6evmboard
 
 # Make UART wake up capable
     write /sys/devices/ocp.2/4806a000.serial/tty/ttyO0/power/wakeup enabled
