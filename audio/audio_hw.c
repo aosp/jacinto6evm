@@ -179,6 +179,8 @@ struct pcm_config pcm_config_playback = {
 #define MIXER_LEFT_HP_DACL1_SWITCH      "Left HP Mixer DACL1 Switch"
 #define MIXER_RIGHT_HP_DACR1_SWITCH     "Right HP Mixer DACR1 Switch"
 #define HP_PLAYBACK_VOLUME              "HP DAC Playback Volume"
+#define HP_DRIVER_POWER_ON_TIME         "Output Driver Power-On time"
+#define HP_DRIVER_50MS_DELAY            "50ms"
 
 /* Line-Out specific */
 #define MIXER_LINE_PLAYBACK_SWITCH      "Line Playback Switch"
@@ -220,6 +222,7 @@ static struct route_setting rs_defaults[] = {
     RS_INT(MIXER_RIGHT_HP_DACR1_SWITCH, 1),
     RS_INT(MIXER_HP_PLAYBACK_SWITCH, 1),
     RS_INT(HP_PLAYBACK_VOLUME, OUTPUT_DB_TO_VAL(0)), /* 0 dB */
+    RS_STR(HP_DRIVER_POWER_ON_TIME, HP_DRIVER_50MS_DELAY),
 
     RS_INT(MIXER_LEFT_LINE_DACL1_SWITCH, 1),
     RS_INT(MIXER_RIGHT_LINE_DACR1_SWITCH, 1),
