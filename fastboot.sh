@@ -213,7 +213,7 @@ then
 	echo "Creating cache.img as empty ext4 img...."
 	rm -rf /tmp/fastboot-cache
 	mkdir /tmp/fastboot-cache
-	./../../../../out/host/linux-x86/bin/make_ext4fs -s -l 256M -a cache ${cacheimg} /tmp/fastboot-cache/
+	./make_ext4fs -s -l 256M -a cache ${cacheimg} /tmp/fastboot-cache/
 	rm -rf /tmp/fastboot-cache
 fi
 
