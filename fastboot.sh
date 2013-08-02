@@ -130,6 +130,9 @@ fi
 echo "Create GPT partition table"
 ${FASTBOOT} oem format
 
+echo "Setting target for bootloader to SPI"
+${FASTBOOT} oem spi
+
 echo "Flashing bootloader....."
 echo "   xloader: ${xloader}"
 ${FASTBOOT} flash xloader 	${xloader}
