@@ -133,9 +133,14 @@ ${FASTBOOT} oem format
 echo "Setting target for bootloader to SPI"
 ${FASTBOOT} oem spi
 
+sleep 3
+
 echo "Flashing bootloader....."
 echo "   xloader: ${xloader}"
 ${FASTBOOT} flash xloader 	${xloader}
+
+sleep 3
+
 ${FASTBOOT} flash bootloader 	${uboot}
 
 #TODO
