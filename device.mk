@@ -83,7 +83,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
 	CameraOMAP \
 	Camera \
-	camera_test
+	camera_test \
+	ion_tiler_test \
+	iontest \
+	ion_ti_test2
 
 # Audio HAL modules
 PRODUCT_PACKAGES += audio.primary.jacinto6
