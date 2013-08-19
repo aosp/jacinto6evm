@@ -17,4 +17,8 @@
 <resources>
     <!-- Turn off GPS as a default. -->
     <string name="def_location_providers_allowed" translatable="false"></string>
+    <!-- DIsable lock screen -->
+    <bool name="def_lockscreen_disabled">true</bool>
+    <!-- Keep screen on allways -->
+    <bool name="def_stay_on_while_plugged_in">true</bool>
 </resources>
