@@ -22,4 +22,4 @@ dev_mount sdcard /storage/sdcard1 auto /devices/ocp.2/4809c000.mmc/mmc_host/mmc0
 
 ## Example of specifying a specific partition for mounts
 # dev_mount sdcard /sdcard 2 /devices/platform/goldfish_mmc.0 /devices/platform/msm_sdcc.2/mmc_host/mmc1
-dev_mount usbflash1  /storage/usb0  auto /devices/ocp.2/488c0000.omap_dwc3/488d0000.dwc3/xhci-hcd.0.auto/usb1/1-1
+dev_mount usbflash1  /storage/usb0  auto /devices/ocp.2/488c0000.omap_dwc3/488d0000.dwc3/xhci-hcd.1.auto/usb1/1-1
