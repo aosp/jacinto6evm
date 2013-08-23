@@ -18,7 +18,7 @@
 # by BoardConfigVendor.mk
 BOARD_USES_GENERIC_AUDIO := true
 USE_CAMERA_STUB := true
-#ENHANCED_DOMX := true
+ENHANCED_DOMX := true
 OMAP_ENHANCEMENT := true
 
 ifdef OMAP_ENHANCEMENT
