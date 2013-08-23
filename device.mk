@@ -36,10 +36,6 @@ PRODUCT_COPY_FILES := \
 	frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
 	frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml
 
-# to mount the external storage (sdcard)
-PRODUCT_COPY_FILES += \
-	device/ti/jacinto6evm/vold.fstab:system/etc/vold.fstab
-
 # These are the hardware-specific features
 PRODUCT_COPY_FILES += \
 	frameworks/native/data/etc/android.hardware.camera.xml:system/etc/permissions/android.hardware.camera.xml \
