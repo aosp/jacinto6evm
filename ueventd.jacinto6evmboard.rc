@@ -5,6 +5,9 @@
 /dev/dsscomp              0666   system     system
 /dev/tiler                0666   system     system
 
+# for IPC3.x
+/dev/rpmsg-dce            0660   media      media
+
 #for SYSLINK
 /dev/rpmsg-omx0 	  0660 	 drmrpc     drmrpc
 /dev/rpmsg-omx1 	  0660   drmrpc     drmrpc
