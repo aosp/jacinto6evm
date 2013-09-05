@@ -61,7 +61,7 @@ fi
 ## poll the board to find out its configuration
 #product=`${FASTBOOT} getvar product 2>&1 | grep product | awk '{print$2}'`
 #cpu=`${FASTBOOT} getvar cpu 2>&1         | grep cpu     | awk '{print$2}'`
-#cputype=`${FASTBOOT} getvar secure 2>&1  | grep secure  | awk '{print$2}'`
+cputype=`${FASTBOOT} getvar secure 2>&1  | grep secure  | awk '{print$2}'`
 #cpurev=`${FASTBOOT} getvar cpurev 2>&1   | grep cpurev  | awk '{print$2}'`
 #
 ## Panda board can not be flashed using fastboot
@@ -74,14 +74,19 @@ fi
 #        product="Blaze"
 #fi
 #
-## Make EMU = HS
-#if [ ${cputype} = "EMU" ]; then
-#        cputype="HS"
-#fi
+# Make EMU = HS
+if [ ${cputype} = "EMU" ]; then
+        cputype="HS"
+fi
+
+# If fastboot does not support getvar default to GP
+if [ ${cputype} = ""]; then
+	cputype="GP"
+fi
 
 # Create the filename
 bootimg="${PRODUCT_OUT}boot.img"
-xloader="${PRODUCT_OUT}MLO"
+xloader="${PRODUCT_OUT}${cputype}_MLO"
 uboot="${PRODUCT_OUT}u-boot.img"
 environment="${PRODUCT_OUT}dra7-evm.dtb"
 systemimg="${PRODUCT_OUT}system.img"
@@ -143,11 +148,10 @@ sleep 3
 
 ${FASTBOOT} flash bootloader 	${uboot}
 
-#TODO
 #echo "Reboot: make sure new bootloader runs..."
-#${FASTBOOT} reboot-bootloader
-#
-#sleep 5
+${FASTBOOT} reboot-bootloader
+
+sleep 5
 
 echo "Flash android partitions"
 ${FASTBOOT} flash boot 		${bootimg}
