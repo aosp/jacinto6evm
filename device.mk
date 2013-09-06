@@ -78,8 +78,7 @@ PRODUCT_PACKAGES += \
 	wlconf
 
 PRODUCT_PACKAGES += \
-	CameraOMAP \
-	Camera \
+	LegacyCamera \
 	camera_test \
 	ion_tiler_test \
 	iontest \
