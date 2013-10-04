@@ -80,7 +80,7 @@ if [ ${cputype} = "EMU" ]; then
 fi
 
 # If fastboot does not support getvar default to GP
-if [ ${cputype} = ""]; then
+if [ ${cputype} = "" ]; then
 	cputype="GP"
 fi
 
