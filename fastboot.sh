@@ -159,50 +159,50 @@ ${FASTBOOT} flash environment	${environment}
 #${FASTBOOT} flash recovery	${recoveryimg}
 ${FASTBOOT} flash system 	${systemimg}
 
-#userdataimg_orig="${userdataimg}.orig"
-#if [ ! -f $userdataimg_orig ]; then
-#	cp $userdataimg $userdataimg_orig
-#else
-#	cp $userdataimg_orig $userdataimg
-#fi
-#
-#echo "Resizing userdata.img"
-#resizefail=0
-#userdatasize=`./fastboot getvar userdata_size 2>&1 | grep "userdata_size" | awk '{print$2}'`
-#if [ -n "$userdatasize" ]; then
-#	while [ 1 ];do
-#		echo Current userdata partition size=${userdatasize} KB
-#		if [ -d "./data" ]; then
-#			echo "Removing data"
-#			rm -rf ./data || resizefail=1
-#			if [ $resizefail -eq 1 ]; then
-#				echo "unable to remove data folder" && break
-#			fi
-#		fi
-#		mkdir ./data
-#		./simg2img userdata.img userdata.img.raw
-#		mount -o loop -o grpid -t ext4 ./userdata.img.raw ./data || resizefail=1
-#		if [ $resizefail -eq 1 ]; then
-#			echo "Mount failed" && break
-#		fi
-#		./make_ext4fs -s -l ${userdatasize}K -a data userdata.img data/
-#		sync
-#		umount data
-#		sync
-#		rm -rf ./data
-#		rm userdata.img.raw
-#		break
-#	done
-#else
-#	resizefail=1
-#fi
-#
-#if [ $resizefail -eq 1 ]; then
-#	echo "userdata resize failed."
-#	echo "Eg: sudo ./fastboot.sh"
-#	echo "For now, we are defaulting to original userdata.img"
-#	cp $userdataimg_orig $userdataimg
-#fi
+userdataimg_orig="${userdataimg}.orig"
+if [ ! -f $userdataimg_orig ]; then
+	cp $userdataimg $userdataimg_orig
+else
+	cp $userdataimg_orig $userdataimg
+fi
+
+echo "Resizing userdata.img"
+resizefail=0
+userdatasize=`./fastboot getvar userdata_size 2>&1 | grep "userdata_size" | awk '{print$2}'`
+if [ -n "$userdatasize" ]; then
+	while [ 1 ];do
+		echo Current userdata partition size=${userdatasize} KB
+		if [ -d "./data" ]; then
+			echo "Removing data"
+			rm -rf ./data || resizefail=1
+			if [ $resizefail -eq 1 ]; then
+				echo "unable to remove data folder" && break
+			fi
+		fi
+		mkdir ./data
+		./simg2img userdata.img userdata.img.raw
+		mount -o loop -o grpid -t ext4 ./userdata.img.raw ./data || resizefail=1
+		if [ $resizefail -eq 1 ]; then
+			echo "Mount failed" && break
+		fi
+		./make_ext4fs -s -l ${userdatasize}K -a data userdata.img data/
+		sync
+		umount data
+		sync
+		rm -rf ./data
+		rm userdata.img.raw
+		break
+	done
+else
+	resizefail=1
+fi
+
+if [ $resizefail -eq 1 ]; then
+	echo "userdata resize failed."
+	echo "Eg: sudo ./fastboot.sh"
+	echo "For now, we are defaulting to original userdata.img"
+	cp $userdataimg_orig $userdataimg
+fi
 ${FASTBOOT} flash userdata ${userdataimg}
 
 if [ "$1" != "--noefs" ] ; then
