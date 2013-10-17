@@ -24,6 +24,8 @@ OMAP_ENHANCEMENT := true
 ifdef OMAP_ENHANCEMENT
 #OMAP_ENHANCEMENT_CPCAM := true
 #OMAP_ENHANCEMENT_S3D := true
+# Multi-zone audio (requires ro.com.ti.omap_multizone_audio, see device.mk)
+OMAP_MULTIZONE_AUDIO := true
 endif
 
 TARGET_CPU_ABI := armeabi-v7a
@@ -77,6 +79,9 @@ COMMON_GLOBAL_CFLAGS += -DOMAP_ENHANCEMENT_S3D
 endif
 ifdef OMAP_ENHANCEMENT_CPCAM
 COMMON_GLOBAL_CFLAGS += -DOMAP_ENHANCEMENT_CPCAM
+endif
+ifeq ($(OMAP_MULTIZONE_AUDIO),true)
+COMMON_GLOBAL_CFLAGS += -DOMAP_MULTIZONE_AUDIO
 endif
 endif
 
