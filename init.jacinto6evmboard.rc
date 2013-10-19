@@ -47,6 +47,7 @@ on boot
     insmod /system/lib/modules/wlcore.ko
     insmod /system/lib/modules/wl12xx.ko
     insmod /system/lib/modules/wl18xx.ko board_type=hdk
+    insmod /system/lib/modules/wlcore_sdio.ko
 
 on fs
     mkdir /factory 0775 radio radio
