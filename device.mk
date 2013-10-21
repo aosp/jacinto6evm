@@ -89,8 +89,12 @@ PRODUCT_PACKAGES += audio.hdmi.jacinto6
 # BlueDroid a2dp Audio HAL module
 PRODUCT_PACKAGES += audio.a2dp.default
 
+# Audio policy
+PRODUCT_PACKAGES += audio_policy.jacinto6
+
 PRODUCT_PACKAGES += \
-	audio_policy.conf
+	audio_policy.conf \
+	dra7evm_paths.xml
 
 PRODUCT_PACKAGES += \
 	tinymix \

@@ -14,7 +14,16 @@
 
 LOCAL_PATH := $(call my-dir)
 
+# build multizone audio if the OMAP_MULTIZONE_AUDIO flag is set to true
+ifeq ($(OMAP_MULTIZONE_AUDIO),true)
+include $(CLEAR_VARS)
+
+include $(LOCAL_PATH)/multizone/Android.mk
+
+else # build the legacy audio if the OMAP_MULTIZONE_AUDIO flag is set to false
+
 include $(CLEAR_VARS)
 
 include $(LOCAL_PATH)/legacy/Android.mk
 
+endif
