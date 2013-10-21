@@ -29,7 +29,6 @@ PRODUCT_COPY_FILES := \
 	device/ti/jacinto6evm/fstab.jacinto6evmboard:root/fstab.jacinto6evmboard \
 	device/ti/jacinto6evm/media_profiles.xml:system/etc/media_profiles.xml \
 	device/ti/jacinto6evm/media_codecs.xml:system/etc/media_codecs.xml \
-	device/ti/jacinto6evm/audio/legacy/audio_policy.conf:system/etc/audio_policy.conf \
 	device/ti/jacinto6evm/bootanimation.zip:/system/media/bootanimation.zip \
 	frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml \
@@ -89,6 +88,9 @@ PRODUCT_PACKAGES += audio.primary.jacinto6
 PRODUCT_PACKAGES += audio.hdmi.jacinto6
 # BlueDroid a2dp Audio HAL module
 PRODUCT_PACKAGES += audio.a2dp.default
+
+PRODUCT_PACKAGES += \
+	audio_policy.conf
 
 PRODUCT_PACKAGES += \
 	tinymix \
