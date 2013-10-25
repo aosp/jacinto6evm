@@ -83,10 +83,10 @@ service pvrsrvinit /vendor/bin/pvrsrvinit
     oneshot
 
 #shared transport user space mgr service for Bluetooth, FM and GPS
-#service uim /system/bin/uim-sysfs
-#    class core
-#    user root
-#    group bluetooth net_bt_admin
+service uim /system/bin/uim-sysfs
+    class core
+    user root
+    group bluetooth net_bt_admin
 
 # create virtual SD card at /mnt/sdcard, based on the /data/media directory
 # daemon will drop to user/group system/media_rw after initializing
