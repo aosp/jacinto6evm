@@ -142,22 +142,25 @@ sleep 3
 
 echo "Flashing bootloader....."
 echo "   xloader: ${xloader}"
-${FASTBOOT} flash xloader 	${xloader}
+${FASTBOOT} flash xloader	${xloader}
 
 sleep 3
 
-${FASTBOOT} flash bootloader 	${uboot}
+${FASTBOOT} flash bootloader	${uboot}
 
 #echo "Reboot: make sure new bootloader runs..."
 ${FASTBOOT} reboot-bootloader
 
 sleep 5
 
+echo "Re-creating GPT partition table with new bootloader"
+${FASTBOOT} oem format
+
 echo "Flash android partitions"
-${FASTBOOT} flash boot 		${bootimg}
+${FASTBOOT} flash boot		${bootimg}
 ${FASTBOOT} flash environment	${environment}
 #${FASTBOOT} flash recovery	${recoveryimg}
-${FASTBOOT} flash system 	${systemimg}
+${FASTBOOT} flash system	${systemimg}
 
 userdataimg_orig="${userdataimg}.orig"
 if [ ! -f $userdataimg_orig ]; then
@@ -230,7 +233,7 @@ then
 fi
 
 #flash cache.img
-${FASTBOOT} flash cache 		${cacheimg}
+${FASTBOOT} flash cache		${cacheimg}
 
 #reboot now
 #${FASTBOOT} reboot
