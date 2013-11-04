@@ -116,6 +116,32 @@ PRODUCT_PACKAGES += \
 	mtpfuse \
 	fusermount
 
+# Can utilities
+PRODUCT_PACKAGES += \
+	libcan \
+	bcmserver \
+	canbusload \
+	can-calc-bit-timing \
+	candump \
+	canfdtest \
+	cangen \
+	cangw \
+	canlogserver \
+	canplayer \
+	cansend \
+	cansniffer \
+	isotpdump \
+	isotprecv \
+	isotpsend \
+	isotpserver \
+	isotpsniffer.c \
+	isotptun \
+	log2asc \
+	log2long \
+	slcan_attach \
+	slcand \
+	slcanpty \
+
 # Enable AAC 5.1 decode (decoder)
 PRODUCT_PROPERTY_OVERRIDES += \
 	media.aac_51_output_enabled=true
