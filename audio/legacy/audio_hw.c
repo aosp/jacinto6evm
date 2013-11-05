@@ -290,6 +290,7 @@ static int find_supported_card(void)
     int found = 0;
     unsigned int i;
 
+#ifdef OMAP_ENHANCEMENT
     do {
         /* returns an error after last valid card */
         int ret = mixer_get_card_name(card, name, sizeof(name));
@@ -304,10 +305,11 @@ static int find_supported_card(void)
             }
         }
     } while (!found && (card++ < MAX_CARD_COUNT));
+#endif
 
     /* Use default card number if not found */
     if (!found)
-        card = 1;
+        card = 0;
 
     return card;
 }
