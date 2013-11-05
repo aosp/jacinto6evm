@@ -111,6 +111,11 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
 	TIMultiDisplay
 
+#MTP Host
+PRODUCT_PACKAGES += \
+	mtpfuse \
+	fusermount
+
 # Enable AAC 5.1 decode (decoder)
 PRODUCT_PROPERTY_OVERRIDES += \
 	media.aac_51_output_enabled=true

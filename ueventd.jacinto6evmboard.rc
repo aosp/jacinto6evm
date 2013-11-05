@@ -23,3 +23,8 @@
 
 #for GCX
 /dev/gcioctl              0666   system     system
+
+#for USB MTP Host
+/dev/bus/usb/002/001      0666   root       root
+/dev/bus/usb/001/002      0666   root       root
+/dev/bus/usb/001/001      0666   root       root
