@@ -36,8 +36,8 @@ AudioStreamOut::AudioStreamOut(AudioHwDevice *hwDev,
                                const PcmParams &params,
                                const SlotMap &map,
                                audio_devices_t devices)
-    : mHwDev(hwDev), mWriter(writer),
-      mParams(params), mDevices(devices), mStandby(true)
+    : mHwDev(hwDev), mNullWriter(&mNullPort, params), mWriter(writer),
+      mParams(params), mDevices(devices), mStandby(true), mUsedForVoiceCall(false)
 {
     if (mWriter)
         mStream = new AdaptedOutStream(params, map);
@@ -134,7 +134,21 @@ int AudioStreamOut::setFormat(audio_format_t format)
 /* must be called with mLock */
 int AudioStreamOut::resume()
 {
-    int ret = mWriter->registerStream(mStream);
+    ALOGV("AudioStreamOut: resume using %s writer",
+          mUsedForVoiceCall ? "null" : "regular");
+
+    /*
+     * Switching PCM writers is done under the assumption that the non-null
+     * writer (mWriter) is always open (but possibly in standby), which is
+     * achieved by using the primary output for voice calls.
+     */
+    PcmWriter *writer;
+    if (mUsedForVoiceCall)
+        writer = &mNullWriter;
+    else
+        writer = mWriter;
+
+    int ret = writer->registerStream(mStream);
     if (ret) {
         ALOGE("AudioStreamOut: failed to register stream %d", ret);
         return ret;
@@ -143,7 +157,7 @@ int AudioStreamOut::resume()
     ret = mStream->start();
     if (ret) {
         ALOGE("AudioStreamOut: failed to start stream %d", ret);
-        mWriter->unregisterStream(mStream);
+        writer->unregisterStream(mStream);
     }
 
     return ret;
@@ -152,8 +166,17 @@ int AudioStreamOut::resume()
 /* must be called with mLock */
 void AudioStreamOut::idle()
 {
+    ALOGV("AudioStreamOut: idle using %s writer",
+          mUsedForVoiceCall ? "null" : "regular");
+
+    PcmWriter *writer;
+    if (mUsedForVoiceCall)
+        writer = &mNullWriter;
+    else
+        writer = mWriter;
+
     mStream->stop();
-    mWriter->unregisterStream(mStream);
+    writer->unregisterStream(mStream);
 }
 
 int AudioStreamOut::standby()
@@ -168,6 +191,31 @@ int AudioStreamOut::standby()
     }
 
     return 0;
+}
+
+void AudioStreamOut::setVoiceCall(bool on)
+{
+    ALOGV("AudioStreamOut: standby()");
+
+    AutoMutex lock(mLock);
+
+    /*
+     * Voice call reuses one of the PCM writers that is otherwise used
+     * for media. Media has to be re-routed to a null writer (that only
+     * consumes the data but doesn't write it to the hardware) when the
+     * voice call starts and routed back to the actual writer when the
+     * voice call stops.
+     * Temporarily entering standby helps transitioning to the null writer
+     * the next time that data is written to the stream if the voice call
+     * occurs at mid-stream.
+     */
+    if (mUsedForVoiceCall != on) {
+        if (!mStandby) {
+            idle();
+            mStandby = true;
+        }
+        mUsedForVoiceCall = on;
+    }
 }
 
 int AudioStreamOut::dump(int fd) const
@@ -549,8 +597,11 @@ uint32_t AudioStreamIn::getInputFramesLost()
 
 /* ---------------------------------------------------------------------------------------- */
 
+const char *AudioHwDevice::kCabinVolumeHP = "HP DAC Playback Volume";
+const char *AudioHwDevice::kCabinVolumeLine = "Line DAC Playback Volume";
+
 AudioHwDevice::AudioHwDevice(uint32_t card)
-    : mCardId(card), mMixer(mCardId), mMicMute(false)
+    : mCardId(card), mMixer(mCardId), mMicMute(false), mMode(AUDIO_MODE_NORMAL)
 {
     ALOGI("AudioHwDevice: create hw device for card hw:%u", card);
 
@@ -583,12 +634,58 @@ AudioHwDevice::AudioHwDevice(uint32_t card)
     writer = new PcmWriter(mOutPorts[kJAMR3PortId], params1);
     mWriters.push_back(writer);
 
+    /* Voice call */
+    PcmParams paramsBT(kBTNumChannels, kSampleSize, kBTSampleRate, kBTFrameCount);
+    writer = new PcmWriter(mOutPorts[kBTPortId], paramsBT);
+    mWriters.push_back(writer);
+    reader = new PcmReader(mInPorts[kBTPortId], paramsBT);
+    mReaders.push_back(reader);
+
+    /* BT is configured as stereo but only the left channel carries data */
+    SlotMap slots;
+    slots[0] = 0;
+    slots[1] = 0;
+
+    /* Voice call uplink */
+    mULPipe = new tiaudioutils::MonoPipe(paramsBT,
+                              (kVoiceCallPipeMs * paramsBT.sampleRate) / 1000);
+    mULPipeWriter = new PipeWriter(mULPipe);
+    mULPipeReader = new PipeReader(mULPipe);
+    mVoiceULInStream = new InStream(paramsBT, slots, mULPipeWriter);
+    mVoiceULOutStream = new OutStream(paramsBT, slots, mULPipeReader);
+
+    /* Voice call downlink */
+    mDLPipe = new tiaudioutils::MonoPipe(paramsBT,
+                              (kVoiceCallPipeMs * params0.sampleRate) / 1000);
+    mDLPipeWriter = new PipeWriter(mDLPipe);
+    mDLPipeReader = new PipeReader(mDLPipe);
+    mVoiceDLInStream = new InStream(paramsBT, slots, mDLPipeWriter);
+    mVoiceDLOutStream = new OutStream(paramsBT, slots, mDLPipeReader);
+
     mMixer.initRoutes();
 }
 
 AudioHwDevice::~AudioHwDevice()
 {
     ALOGI("AudioHwDevice: destroy hw device for card hw:%u", mCardId);
+
+    if (mDLPipeWriter)
+        delete mDLPipeWriter;
+
+    if (mDLPipeReader)
+        delete mDLPipeReader;
+
+    if (mDLPipe)
+        delete mDLPipe;
+
+    if (mULPipeWriter)
+        delete mULPipeWriter;
+
+    if (mULPipeReader)
+        delete mULPipeReader;
+
+    if (mULPipe)
+        delete mULPipe;
 
     for (WriterVect::const_iterator i = mWriters.begin(); i != mWriters.end(); ++i) {
         delete (*i);
@@ -640,13 +737,49 @@ int AudioHwDevice::initCheck() const
         }
     }
 
+    if ((mULPipe == NULL) || !mULPipe->initCheck() ||
+        (mULPipeReader == NULL) || !mULPipeReader->initCheck() ||
+        (mULPipeWriter == NULL) || !mULPipeWriter->initCheck()) {
+        ALOGE("AudioHwDevice: voice call uplink init check failed");
+        return -ENODEV;
+    }
+
+    if ((mDLPipe == NULL) || !mDLPipe->initCheck() ||
+        (mDLPipeReader == NULL) || !mDLPipeReader->initCheck() ||
+        (mDLPipeWriter == NULL) || !mDLPipeWriter->initCheck()) {
+        ALOGE("AudioHwDevice: voice call downlink init check failed");
+        return -ENODEV;
+    }
+
+    if ((mVoiceULInStream == NULL) || !mVoiceULInStream->initCheck() ||
+        (mVoiceULOutStream == NULL) || !mVoiceULOutStream->initCheck()) {
+        ALOGE("AudioHwDevice: voice call uplink streams init check failed");
+        return -ENODEV;
+    }
+
+    if ((mVoiceDLInStream == NULL) || !mVoiceDLInStream->initCheck() ||
+        (mVoiceDLOutStream == NULL) || !mVoiceDLOutStream->initCheck()) {
+        ALOGE("AudioHwDevice: voice call downlink streams init check failed");
+        return -ENODEV;
+    }
+
     return 0;
 }
 
 int AudioHwDevice::setVoiceVolume(float volume)
 {
-    ALOGV("AudioHwDevice: setVoiceVolume() vol=%.4f", volume);
-    return -ENOSYS;
+    /* Linear interpolation between voice dB limits */
+    float dB = (kVoiceDBMax - kVoiceDBMin) * volume + kVoiceDBMin;
+
+    /* Output stage gain (-59.0dB, 0dB) with steps of 0.5dB */
+    int val = 2 * (dB + 59.0f);
+
+    ALOGV("AudioHwDevice: setVoiceVolume() vol=%.4f dB=%.4f", volume, dB, val);
+
+    mMixer.set(ALSAControl(kCabinVolumeHP, val), true);
+    mMixer.set(ALSAControl(kCabinVolumeLine, val), true);
+
+    return 0;
 }
 
 int AudioHwDevice::setMasterVolume(float volume)
@@ -677,7 +810,162 @@ int AudioHwDevice::setMode(audio_mode_t mode)
 {
     ALOGV("AudioHwDevice: setMode() %s", getModeName(mode));
 
-    return 0;
+    AutoMutex lock(mLock);
+    if (mMode == mode) {
+        ALOGW("AudioHwDevice: already in mode %s", getModeName(mode));
+        return 0;
+    }
+
+    int ret = 0;
+    if (mode == AUDIO_MODE_IN_CALL) {
+        ret = enterVoiceCall();
+        ALOGE_IF(ret, "AudioHwDevice: failed to enter voice call %d", ret);
+    } else {
+        leaveVoiceCall();
+    }
+
+    if (!ret)
+        mMode = mode;
+
+    return ret;
+}
+
+int AudioHwDevice::enableVoiceCall()
+{
+    ALOGV("AudioHwDevice: enable voice call paths");
+
+    sp<AudioStreamOut> outStream = mPrimaryStreamOut.promote();
+    if (outStream == NULL) {
+        ALOGE("AudioHwDevice: primary output stream is not valid");
+        return -ENODEV;
+    }
+
+    /* Playback stream will free the writer and switch to a null writer */
+    outStream->setVoiceCall(true);
+
+    /* Uplink input stream: Mic -> Pipe */
+    int ret = mReaders[kCPUPortId]->registerStream(mVoiceULInStream);
+    if (ret) {
+        ALOGE("AudioHwDevice: failed to register uplink in stream %d", ret);
+        return ret;
+    }
+
+    /* Uplink output stream: Pipe -> Bluetooth */
+    ret = mWriters[kBTPortId]->registerStream(mVoiceULOutStream);
+    if (ret) {
+        ALOGE("AudioHwDevice: failed to register uplink out stream %d", ret);
+        return ret;
+    }
+
+    /* Downlink input stream: Bluetooth -> Pipe */
+    ret = mReaders[kBTPortId]->registerStream(mVoiceDLInStream);
+    if (ret) {
+        ALOGE("AudioHwDevice: failed to register downlink in stream %d", ret);
+        return ret;
+    }
+
+    /* Downlink output stream: Pipe -> Speaker */
+    ret = outStream->mWriter->registerStream(mVoiceDLOutStream);
+    if (ret) {
+        ALOGE("AudioHwDevice: failed to register downlink out stream %d", ret);
+    }
+
+    return ret;
+}
+
+void AudioHwDevice::disableVoiceCall()
+{
+    ALOGV("AudioHwDevice: disable voice call paths");
+
+    sp<AudioStreamOut> outStream = mPrimaryStreamOut.promote();
+    if (outStream != NULL) {
+        outStream->setVoiceCall(false);
+        if (outStream->mWriter->isStreamRegistered(mVoiceDLOutStream))
+            outStream->mWriter->unregisterStream(mVoiceDLOutStream);
+    } else {
+        ALOGE("AudioHwDevice: primary output stream is not valid");
+    }
+
+    if (mReaders[kBTPortId]->isStreamRegistered(mVoiceDLInStream))
+        mReaders[kBTPortId]->unregisterStream(mVoiceDLInStream);
+
+    if (mWriters[kBTPortId]->isStreamRegistered(mVoiceULOutStream))
+        mWriters[kBTPortId]->unregisterStream(mVoiceULOutStream);
+
+    if (mReaders[kCPUPortId]->isStreamRegistered(mVoiceULInStream))
+        mReaders[kCPUPortId]->unregisterStream(mVoiceULInStream);
+}
+
+int AudioHwDevice::enterVoiceCall()
+{
+    ALOGI("AudioHwDevice: enter voice call");
+
+    /* Setup uplink and downlink pipes */
+    int ret = enableVoiceCall();
+    if (ret) {
+        ALOGE("AudioHwDevice: failed to enable voice call path %d", ret);
+        return ret;
+    }
+
+    /* Uplink input stream: Mic -> Pipe */
+    ret = mVoiceULInStream->start();
+    if (ret) {
+        ALOGE("AudioHwDevice: failed to start uplink in stream %d", ret);
+        return ret;
+    }
+
+    /* Downlink input stream: Bluetooth -> Pipe */
+    ret = mVoiceDLInStream->start();
+    if (ret) {
+        ALOGE("AudioHwDevice: failed to start downlink in stream %d", ret);
+        return ret;
+    }
+
+    /*
+     * Wait till pipe is half full to give a head start to the output streams.
+     * The time to wait consists of the actual pipe size, the ADC settle time
+     * used in the kernel and the time needed to produce a BT audio buffer.
+     * Only the pipe size related time contributes to the steady state latency.
+     */
+    usleep((kVoiceCallPipeMs * 5000) + (kADCSettleMs * 1000) +
+           (kBTFrameCount * 1000) / kBTSampleRate);
+
+    /* Downlink output stream: Pipe -> Speaker */
+     ret = mVoiceDLOutStream->start();
+    if (ret) {
+        ALOGE("AudioHwDevice: failed to start downlink out stream %d", ret);
+    }
+
+    /* Uplink output stream: Pipe -> Bluetooth */
+    ret = mVoiceULOutStream->start();
+    if (ret) {
+        ALOGE("AudioHwDevice: failed to start uplink out stream %d", ret);
+        return ret;
+    }
+
+    return ret;
+}
+
+void AudioHwDevice::leaveVoiceCall()
+{
+    ALOGI("AudioHwDevice: leave voice call");
+
+    if (mVoiceDLOutStream->isStarted())
+        mVoiceDLOutStream->stop();
+
+    if (mVoiceULInStream->isStarted())
+        mVoiceULInStream->stop();
+
+    if (mVoiceULOutStream->isStarted())
+        mVoiceULOutStream->stop();
+
+    if (mVoiceDLInStream->isStarted())
+        mVoiceDLInStream->stop();
+
+    disableVoiceCall();
+
+    /* Reset the cabin volume for media */
+    setVoiceVolume(1.0f);
 }
 
 int AudioHwDevice::setMicMute(bool state)
@@ -716,6 +1004,7 @@ size_t AudioHwDevice::getInputBufferSize(const struct audio_config *config) cons
 {
     ALOGV("AudioHwDevice: getInputBufferSize()");
 
+    AutoMutex lock(mLock);
     size_t size;
 
     /* Take resampling ratio into account and align to the nearest
@@ -788,6 +1077,12 @@ AudioStreamIn* AudioHwDevice::openInputStream(audio_io_handle_t handle,
     }
 
     SlotMap slotMap(srcMask, dstMask);
+    if (!slotMap.isValid()) {
+        ALOGE("AudioHwDevice: failed to create slot map");
+        return NULL;
+    }
+
+    AutoMutex lock(mLock);
 
     /* Set the parameters for the internal input stream. Don't change the
      * parameters for capture. The resampler is used if needed. */
@@ -809,6 +1104,8 @@ AudioStreamIn* AudioHwDevice::openInputStream(audio_io_handle_t handle,
 void AudioHwDevice::closeInputStream(AudioStreamIn *in)
 {
     ALOGV("AudioHwDevice: closeInputStream()");
+
+    AutoMutex lock(mLock);
 
     if (mInStreams.find(in) == mInStreams.end()) {
         ALOGW("AudioHwDevice: input stream %p is not open", in);
@@ -856,6 +1153,8 @@ AudioStreamOut* AudioHwDevice::openOutputStream(audio_io_handle_t handle,
         return NULL;
     }
 
+    AutoMutex lock(mLock);
+
     /* Set the parameters for the internal output stream */
     params.frameCount = mWriters[port]->getParams().frameCount;
     params.sampleRate = config->sample_rate; /* Use stream's resampler if needed */
@@ -883,6 +1182,9 @@ AudioStreamOut* AudioHwDevice::openOutputStream(audio_io_handle_t handle,
         return NULL;
     }
 
+    if (flags & AUDIO_OUTPUT_FLAG_PRIMARY)
+        mPrimaryStreamOut = out;
+
     mOutStreams.insert(out);
 
     return out.get();
@@ -892,10 +1194,15 @@ void AudioHwDevice::closeOutputStream(AudioStreamOut *out)
 {
     ALOGV("AudioHwDevice: closeOutputStream()");
 
+    AutoMutex lock(mLock);
+
     if (mOutStreams.find(out) == mOutStreams.end()) {
         ALOGW("AudioHwDevice: output stream %p is not open", out);
         return;
     }
+
+    if (mPrimaryStreamOut == out)
+        mPrimaryStreamOut = NULL;
 
     mOutStreams.erase(out);
 

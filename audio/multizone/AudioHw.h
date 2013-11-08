@@ -23,6 +23,7 @@
 #include <hardware/audio_effect.h>
 
 #include <tiaudioutils/Pcm.h>
+#include <tiaudioutils/NullPcm.h>
 #include <tiaudioutils/ALSAPcm.h>
 #include <tiaudioutils/ALSAMixer.h>
 #include <tiaudioutils/MumStream.h>
@@ -87,16 +88,23 @@ class AudioStreamOut : public RefBase, public AudioStream {
     int getRenderPosition(uint32_t *dsp_frames) const;
     int getNextWriteTimestamp(int64_t *timestamp) const;
 
+    void setVoiceCall(bool on);
+
+    friend AudioHwDevice;
+
  protected:
     int resume();
     void idle();
 
     AudioHwDevice *mHwDev;
+    NullOutPort mNullPort;
+    PcmWriter mNullWriter;
     PcmWriter *mWriter;
     PcmParams mParams;
     audio_devices_t mDevices;
     sp<OutStream> mStream;
     bool mStandby;
+    bool mUsedForVoiceCall;
     Mutex mLock;
 };
 
@@ -174,16 +182,28 @@ class AudioHwDevice {
     friend class AudioStreamIn;
     friend class AudioStreamOut;
 
-    static const uint32_t kNumPorts = 2;
+    static const uint32_t kNumPorts = 3;
     static const uint32_t kCPUPortId = 0;
     static const uint32_t kJAMR3PortId = 1;
+    static const uint32_t kBTPortId = 2;
     static const uint32_t kCPUNumChannels = 2;
     static const uint32_t kJAMR3NumChannels = 8;
+    static const uint32_t kBTNumChannels = 2;
 
     static const uint32_t kSampleRate = 44100;
+    static const uint32_t kBTSampleRate = 8000;
     static const uint32_t kSampleSize = 16;
     static const uint32_t kCaptureFrameCount = 882;
     static const uint32_t kPlaybackFrameCount = 1024;
+    static const uint32_t kBTFrameCount = 160;
+
+    static const uint32_t kADCSettleMs = 80;
+    static const uint32_t kVoiceCallPipeMs = 100;
+
+    static const float kVoiceDBMax = 0.0f;
+    static const float kVoiceDBMin = -24.0f;
+    static const char *kCabinVolumeHP;
+    static const char *kCabinVolumeLine;
 
  protected:
     typedef set< sp<AudioStreamIn> > StreamInSet;
@@ -194,6 +214,10 @@ class AudioHwDevice {
     typedef vector<PcmWriter*> WriterVect;
 
     const char *getModeName(audio_mode_t mode) const;
+    int enterVoiceCall();
+    void leaveVoiceCall();
+    int enableVoiceCall();
+    void disableVoiceCall();
 
     uint32_t mCardId;
     ALSAMixer mMixer;
@@ -204,6 +228,19 @@ class AudioHwDevice {
     StreamInSet mInStreams;
     StreamOutSet mOutStreams;
     bool mMicMute;
+    audio_mode_t mMode;
+    wp<AudioStreamOut> mPrimaryStreamOut;
+    tiaudioutils::MonoPipe *mULPipe;
+    tiaudioutils::MonoPipe *mDLPipe;
+    PipeWriter *mULPipeWriter;
+    PipeWriter *mDLPipeWriter;
+    PipeReader *mULPipeReader;
+    PipeReader *mDLPipeReader;
+    sp<InStream> mVoiceULInStream;
+    sp<InStream> mVoiceDLInStream;
+    sp<OutStream> mVoiceULOutStream;
+    sp<OutStream> mVoiceDLOutStream;
+    mutable Mutex mLock;
 };
 
 }; // namespace android
