@@ -34,7 +34,8 @@ PRODUCT_COPY_FILES := \
 	frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml \
 	frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
 	frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
-	device/ti/jacinto6evm/Atmel_maXTouch_Touchscreen.idc:system/usr/idc/Atmel_maXTouch_Touchscreen.idc
+	device/ti/jacinto6evm/Atmel_maXTouch_Touchscreen.idc:system/usr/idc/Atmel_maXTouch_Touchscreen.idc \
+	device/ti/proprietary-open/jacinto6/dra7-ipu1-fw.xem4:dra7-ipu1-fw.xem4
 
 # These are the hardware-specific features
 PRODUCT_COPY_FILES += \
