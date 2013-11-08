@@ -31,7 +31,7 @@
 <!-- JAMR3 board, codec-A input: Line-In -->
 <ctl name="J3A Left PGA Mixer Line1L Switch" value="1" />
 <ctl name="J3A Right PGA Mixer Line1R Switch" value="1" />
-<ctl name="J3A PGA Capture Switch" value="0" />
+<ctl name="J3A PGA Capture Switch" value="1" />
 <ctl name="J3A PGA Capture Volume" value="0" />
 <ctl name="J3A Left Line1L Mux" value="differential" />
 <ctl name="J3A Right Line1L Mux" value="differential" />
@@ -53,7 +53,7 @@
 <ctl name="J3A Right DAC Mux" value="DAC_R1" />
 <ctl name="J3A Left Line Mixer DACL1 Switch" value="1" />
 <ctl name="J3A Right Line Mixer DACR1 Switch" value="1" />
-<ctl name="J3A Line DAC Playback Volume" value="0" />
+<ctl name="J3A Line DAC Playback Volume" value="118" />
 <ctl name="J3A Line Playback Switch" value="1" />
 <ctl name="J3A PCM Playback Volume" value="127" />
 
@@ -62,7 +62,7 @@
 <ctl name="J3B Right DAC Mux" value="DAC_R1" />
 <ctl name="J3B Left Line Mixer DACL1 Switch" value="1" />
 <ctl name="J3B Right Line Mixer DACR1 Switch" value="1" />
-<ctl name="J3B Line DAC Playback Volume" value="0" />
+<ctl name="J3B Line DAC Playback Volume" value="118" />
 <ctl name="J3B Line Playback Switch" value="1" />
 <ctl name="J3B PCM Playback Volume" value="127" />
 
@@ -71,7 +71,7 @@
 <ctl name="J3C Right DAC Mux" value="DAC_R1" />
 <ctl name="J3C Left Line Mixer DACL1 Switch" value="1" />
 <ctl name="J3C Right Line Mixer DACR1 Switch" value="1" />
-<ctl name="J3C Line DAC Playback Volume" value="0" />
+<ctl name="J3C Line DAC Playback Volume" value="118" />
 <ctl name="J3C Line Playback Switch" value="1" />
 <ctl name="J3C PCM Playback Volume" value="127" />
 
@@ -90,21 +90,6 @@
 <!-- JAMR3 codec B input: Mono mic right -->
 <path name="AUDIO_DEVICE_IN_BACK_MIC">
 <ctl name="J3B PGA Capture Switch" id="1" value="1" />
-</path>
-
-<!-- On-board output: Line-Out -->
-<path name="AUDIO_DEVICE_OUT_SPEAKER">
-<ctl name="Line DAC Playback Volume" value="118" />
-</path>
-
-<!-- JAMR3 codec B output: Line-Out -->
-<path name="AUDIO_DEVICE_OUT_WIRED_HEADPHONE">
-<ctl name="J3B Line DAC Playback Volume" value="118" />
-</path>
-
-<!-- JAMR3 codec C output: Line-Out -->
-<path name="AUDIO_DEVICE_OUT_WIRED_HEADPHONE2">
-<ctl name="J3C Line DAC Playback Volume" value="118" />
 </path>
 
 </mixer>

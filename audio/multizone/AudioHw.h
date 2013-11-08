@@ -53,10 +53,6 @@ class AudioStream {
     virtual char *getParameters(const char *keys) const = 0;
     virtual int addAudioEffect(effect_handle_t effect) const = 0;
     virtual int removeAudioEffect(effect_handle_t effect) const = 0;
-
-    // FIXME not used
-    static const uint32_t kDefaultSampleRate = 44100;
-    static const uint32_t kDefaultBufferSize = 4096;
 };
 
 class AudioStreamOut : public RefBase, public AudioStream {
@@ -92,6 +88,9 @@ class AudioStreamOut : public RefBase, public AudioStream {
     int getNextWriteTimestamp(int64_t *timestamp) const;
 
  protected:
+    int resume();
+    void idle();
+
     AudioHwDevice *mHwDev;
     PcmWriter *mWriter;
     PcmParams mParams;
@@ -132,6 +131,9 @@ class AudioStreamIn : public RefBase, public AudioStream {
     uint32_t getInputFramesLost();
 
  protected:
+    int resume();
+    void idle();
+
     AudioHwDevice *mHwDev;
     PcmReader *mReader;
     PcmParams mParams;

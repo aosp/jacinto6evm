@@ -131,6 +131,31 @@ int AudioStreamOut::setFormat(audio_format_t format)
     return 0;
 }
 
+/* must be called with mLock */
+int AudioStreamOut::resume()
+{
+    int ret = mWriter->registerStream(mStream);
+    if (ret) {
+        ALOGE("AudioStreamOut: failed to register stream %d", ret);
+        return ret;
+    }
+
+    ret = mStream->start();
+    if (ret) {
+        ALOGE("AudioStreamOut: failed to start stream %d", ret);
+        mWriter->unregisterStream(mStream);
+    }
+
+    return ret;
+}
+
+/* must be called with mLock */
+void AudioStreamOut::idle()
+{
+    mStream->stop();
+    mWriter->unregisterStream(mStream);
+}
+
 int AudioStreamOut::standby()
 {
     ALOGV("AudioStreamOut: standby()");
@@ -138,9 +163,7 @@ int AudioStreamOut::standby()
     AutoMutex lock(mLock);
 
     if (!mStandby) {
-        mStream->stop();
-        mWriter->unregisterStream(mStream);
-        mHwDev->mMixer.setPath(mDevices, false);
+        idle();
         mStandby = true;
     }
 
@@ -229,20 +252,12 @@ ssize_t AudioStreamOut::write(const void* buffer, size_t bytes)
     AutoMutex lock(mLock);
 
     if (mStandby) {
-        mHwDev->mMixer.setPath(mDevices, true);
-        ret = mWriter->registerStream(mStream);
+        ret = resume();
         if (ret) {
-            ALOGE("AudioStreamOut: failed to register stream %d", ret);
-            return ret;
-        }
-        ret = mStream->start();
-        if (ret) {
-            ALOGE("AudioStreamOut: failed to start stream %d", ret);
-            mWriter->unregisterStream(mStream);
+            ALOGE("AudioStreamOut: failed to resume stream %d", ret);
             usleep(usecs); /* limits the rate of error messages */
             return ret;
         }
-
         mStandby = false;
     }
 
@@ -361,6 +376,34 @@ int AudioStreamIn::setFormat(audio_format_t format)
     return 0;
 }
 
+/* must be called with mLock */
+int AudioStreamIn::resume()
+{
+    mHwDev->mMixer.setPath(mDevices, true);
+
+    int ret = mReader->registerStream(mStream);
+    if (ret) {
+        ALOGE("AudioStreamIn: failed to register Dest %d", ret);
+        return ret;
+    }
+
+    ret = mStream->start();
+    if (ret) {
+        ALOGE("AudioStreamIn: failed to start stream %d", ret);
+        mReader->unregisterStream(mStream);
+    }
+
+    return ret;
+}
+
+/* must be called with mLock */
+void AudioStreamIn::idle()
+{
+    mStream->stop();
+    mReader->unregisterStream(mStream);
+    mHwDev->mMixer.setPath(mDevices, false);
+}
+
 int AudioStreamIn::standby()
 {
     ALOGV("AudioStreamIn: standby()");
@@ -368,9 +411,7 @@ int AudioStreamIn::standby()
     AutoMutex lock(mLock);
 
     if (!mStandby) {
-        mStream->stop();
-        mReader->unregisterStream(mStream);
-        mHwDev->mMixer.setPath(mDevices, false);
+        idle();
         mStandby = true;
     }
 
@@ -473,27 +514,18 @@ ssize_t AudioStreamIn::read(void* buffer, size_t bytes)
     AutoMutex lock(mLock);
 
     if (mStandby) {
-        mHwDev->mMixer.setPath(mDevices, true);
-        ret = mReader->registerStream(mStream);
+        ret = resume();
         if (ret) {
-            ALOGE("AudioStreamIn: failed to register Dest %d", ret);
-            return ret;
-        }
-        ret = mStream->start();
-        if (ret) {
-            ALOGE("AudioStreamIn: failed to start stream %d", ret);
-            mReader->unregisterStream(mStream);
+            ALOGE("AudioStreamIn: failed to resume stream %d", ret);
             usleep(usecs); /* limits the rate of error messages */
             return ret;
         }
-
         mStandby = false;
     }
 
     ret = mStream->read(buffer, frames);
     if (ret < 0) {
         ALOGE("AudioStreamIn: failed to read data %d", ret);
-        uint32_t usecs = (frames * 1000000) / mParams.sampleRate;
         usleep(usecs);
         bytes = ret;
     } else {
