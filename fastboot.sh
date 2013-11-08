@@ -94,6 +94,7 @@ userdataimg="${PRODUCT_OUT}userdata.img"
 cacheimg="${PRODUCT_OUT}cache.img"
 efsimg="${PRODUCT_OUT}efs.img"
 recoveryimg="${PRODUCT_OUT}recovery.img"
+ipuimg="${PRODUCT_OUT}dra7-ipu1-fw.xem4"
 
 
 # Verify that all the files required for the fastboot flash
@@ -131,6 +132,11 @@ if [ ! -e "${recoveryimg}" ] ; then
   echo "Missing ${recoveryimg}"
 #  exit -1;
 fi
+if [ ! -e "${ipuimg}" ] ; then
+  echo "Missing ${ipuimg}"
+  exit -1;
+fi
+
 
 echo "Create GPT partition table"
 ${FASTBOOT} oem format
@@ -161,6 +167,7 @@ ${FASTBOOT} flash boot		${bootimg}
 ${FASTBOOT} flash environment	${environment}
 #${FASTBOOT} flash recovery	${recoveryimg}
 ${FASTBOOT} flash system	${systemimg}
+${FASTBOOT} flash ipu		${ipuimg}
 
 userdataimg_orig="${userdataimg}.orig"
 if [ ! -f $userdataimg_orig ]; then
