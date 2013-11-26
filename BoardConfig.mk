@@ -17,9 +17,9 @@
 # These two variables are set first, so they can be overridden
 # by BoardConfigVendor.mk
 BOARD_USES_GENERIC_AUDIO := true
-USE_CAMERA_STUB := true
-ENHANCED_DOMX := true
-OMAP_ENHANCEMENT := true
+#USE_CAMERA_STUB := true
+#ENHANCED_DOMX := true
+#OMAP_ENHANCEMENT := true
 
 ifdef OMAP_ENHANCEMENT
 #OMAP_ENHANCEMENT_CPCAM := true
@@ -62,7 +62,7 @@ BOARD_FLASH_BLOCK_SIZE := 4096
 #TARGET_USERIMAGES_SPARSE_EXT_DISABLED := true
 
 # Connectivity - Wi-Fi
-USES_TI_MAC80211 := true
+#USES_TI_MAC80211 := true
 ifdef USES_TI_MAC80211
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
 WPA_SUPPLICANT_VERSION      := VER_0_8_X_TI
