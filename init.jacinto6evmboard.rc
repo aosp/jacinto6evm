@@ -18,11 +18,14 @@ on init
     symlink /mnt/shell/emulated/0 /storage/emulated/legacy
 
 # create the real external storage
-    mkdir /storage/sdcard1 0000 system system
+    mkdir /storage/sdcard1 0700 root root
+    mkdir /mnt/media_rw/sdcard1 0700 media_rw media_rw
 
 # create removable USB Mass Storage mountpoints
-    mkdir /storage/usb0 0000 system system
-    mkdir /storage/usb1 0000 system system
+    mkdir /storage/usb0 0700 root root
+    mkdir /storage/usb1 0700 root root
+    mkdir /mnt/media_rw/usb0 0700 media_rw media_rw
+    mkdir /mnt/media_rw/usb1 0700 media_rw media_rw
 
 on post-fs-data
 
@@ -91,8 +94,8 @@ service uim /system/bin/uim-sysfs
 # create virtual SD card at /mnt/sdcard, based on the /data/media directory
 # daemon will drop to user/group system/media_rw after initializing
 # underlying files in /data/media will be created with user and group media_rw (1023)
-service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
-    class main
+service sdcard /system/bin/sdcard -u 1023 -g 1023 -l /data/media /mnt/shell/emulated
+    class late_start
 
 service mtpfuse /system/bin/mtpfuse /storage/sdcard0/mtpfs -o allow_other
     class main
@@ -165,3 +168,12 @@ service hostapd_bin /system/bin/hostapd -d /data/misc/wifi/hostapd.conf
     class main
     disabled
     oneshot
+
+# fusewrapped external USB daemons running as media_rw (1023)
+service fuse_usb0 /system/bin/sdcard -u 1023 -g 1023 -d /mnt/media_rw/usb0 /storage/usb0
+    class late_start
+    disabled
+
+service fuse_usb1 /system/bin/sdcard -u 1023 -g 1023 -d /mnt/media_rw/usb1 /storage/usb1
+    class late_start
+    disabled
