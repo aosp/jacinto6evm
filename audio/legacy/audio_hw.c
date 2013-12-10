@@ -1044,7 +1044,7 @@ static int adev_set_mic_mute(struct audio_hw_device *dev, bool state)
     ALOGV("adev_set_mic_mute() state=%s", state ? "mute" : "unmute");
 
     pthread_mutex_lock(&adev->lock);
-    set_route_by_array(adev->mixer, rs_capture, state);
+    set_route_by_array(adev->mixer, rs_capture, !state);
     adev->mic_mute = state;
     pthread_mutex_unlock(&adev->lock);
 
