@@ -599,6 +599,7 @@ uint32_t AudioStreamIn::getInputFramesLost()
 
 const char *AudioHwDevice::kCabinVolumeHP = "HP DAC Playback Volume";
 const char *AudioHwDevice::kCabinVolumeLine = "Line DAC Playback Volume";
+const char *AudioHwDevice::kBTMode = "Bluetooth Mode";
 
 AudioHwDevice::AudioHwDevice(uint32_t card)
     : mCardId(card), mMixer(mCardId), mMicMute(false), mMode(AUDIO_MODE_NORMAL)
@@ -907,6 +908,12 @@ int AudioHwDevice::enterVoiceCall()
         return ret;
     }
 
+    /* Bluetooth is master, provides BCLK and FSYNC */
+    mMixer.set(ALSAControl(kBTMode, "Master"), true);
+
+    mULPipe->shutdown(false);
+    mDLPipe->shutdown(false);
+
     /* Uplink input stream: Mic -> Pipe */
     ret = mVoiceULInStream->start();
     if (ret) {
@@ -950,17 +957,35 @@ void AudioHwDevice::leaveVoiceCall()
 {
     ALOGI("AudioHwDevice: leave voice call");
 
-    if (mVoiceDLOutStream->isStarted())
-        mVoiceDLOutStream->stop();
+    /*
+     * The PCM ports used for Bluetooth are slaves and they can lose the
+     * BCLK and FSYNC while still active. That leads to blocking read() and
+     * write() calls, which is prevented by switching the clock source to
+     * an internal one and explicitly stopping both ports for the new source
+     * to take effect at kernel level
+     */
+    mMixer.set(ALSAControl(kBTMode, "Slave"), true);
 
+    mULPipe->shutdown(true);
+    mDLPipe->shutdown(true);
+
+    /* Uplink input stream: Mic -> Pipe */
     if (mVoiceULInStream->isStarted())
         mVoiceULInStream->stop();
 
-    if (mVoiceULOutStream->isStarted())
-        mVoiceULOutStream->stop();
-
+    /* Downlink input stream: Bluetooth -> Pipe */
+    mInPorts[kBTPortId]->stop();
     if (mVoiceDLInStream->isStarted())
         mVoiceDLInStream->stop();
+
+    /* Downlink output stream: Pipe -> Speaker */
+    if (mVoiceDLOutStream->isStarted())
+        mVoiceDLOutStream->stop();
+
+    /* Uplink output stream: Pipe -> Bluetooth */
+    mOutPorts[kBTPortId]->stop();
+    if (mVoiceULOutStream->isStarted())
+        mVoiceULOutStream->stop();
 
     disableVoiceCall();
 
