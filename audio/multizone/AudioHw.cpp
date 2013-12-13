@@ -24,7 +24,7 @@
 #endif
 
 #include <cutils/log.h>
-
+#include <cutils/properties.h>
 #include <media/AudioParameter.h>
 
 #include <AudioHw.h>
@@ -426,8 +426,6 @@ int AudioStreamIn::setFormat(audio_format_t format)
 /* must be called with mLock */
 int AudioStreamIn::resume()
 {
-    mHwDev->mMixer.setPath(mDevices, true);
-
     int ret = mReader->registerStream(mStream);
     if (ret) {
         ALOGE("AudioStreamIn: failed to register Dest %d", ret);
@@ -448,7 +446,6 @@ void AudioStreamIn::idle()
 {
     mStream->stop();
     mReader->unregisterStream(mStream);
-    mHwDev->mMixer.setPath(mDevices, false);
 }
 
 int AudioStreamIn::standby()
@@ -603,7 +600,27 @@ const char *AudioHwDevice::kBTMode = "Bluetooth Mode";
 AudioHwDevice::AudioHwDevice(uint32_t card)
     : mCardId(card), mMixer(mCardId), mMicMute(false), mMode(AUDIO_MODE_NORMAL)
 {
-    ALOGI("AudioHwDevice: create hw device for card hw:%u", card);
+    /*
+     * "multizone_audio.use_jamr" property is used to indicate if JAMR3
+     * board is available in the system:
+     * - Present
+     *    o Cabin   : port 1, slots 0 & 1
+     *    o Mic     : port 1, slot 2
+     *    o Back Mic: port 1, slot 3
+     * - Not present
+     *    o Cabin   : port 0, slots 0 & 1
+     *    o Mic     : port 0, slots 0 & 1
+     */
+    char value[PROPERTY_VALUE_MAX];
+    if ((property_get("persist.audio.use_jamr", value, NULL) == 0) ||
+        !strcmp(value, "1") || !strcasecmp(value, "true")) {
+        mMediaPortId = kJAMR3PortId;
+    } else {
+        mMediaPortId = kCPUPortId;
+    }
+
+    ALOGI("AudioHwDevice: create hw device for card hw:%u Jacinto6 EVM %s",
+          card, usesJAMR3() ? "+ JAMR3" : "");
 
     /* Mixer for dra7evm and input/output ports for JAMR3 PCM device */
     for (uint32_t i = 0; i < kNumPorts; i++) {
@@ -646,12 +663,22 @@ AudioHwDevice::AudioHwDevice(uint32_t card)
     slots[0] = 0;
     slots[1] = 0;
 
+    /* Microphone slots are different in JAMR3 and CPU board */
+    SlotMap micSlots;
+    if (usesJAMR3()) {
+        micSlots[0] = 2;
+        micSlots[1] = 2;
+    } else {
+        micSlots[0] = 0;
+        micSlots[1] = 0;
+    }
+
     /* Voice call uplink */
     mULPipe = new tiaudioutils::MonoPipe(paramsBT,
                               (kVoiceCallPipeMs * paramsBT.sampleRate) / 1000);
     mULPipeWriter = new PipeWriter(mULPipe);
     mULPipeReader = new PipeReader(mULPipe);
-    mVoiceULInStream = new InStream(paramsBT, slots, mULPipeWriter);
+    mVoiceULInStream = new InStream(paramsBT, micSlots, mULPipeWriter);
     mVoiceULOutStream = new OutStream(paramsBT, slots, mULPipeReader);
 
     /* Voice call downlink */
@@ -844,7 +871,7 @@ int AudioHwDevice::enableVoiceCall()
     outStream->setVoiceCall(true);
 
     /* Uplink input stream: Mic -> Pipe */
-    int ret = mReaders[kCPUPortId]->registerStream(mVoiceULInStream);
+    int ret = mReaders[mMediaPortId]->registerStream(mVoiceULInStream);
     if (ret) {
         ALOGE("AudioHwDevice: failed to register uplink in stream %d", ret);
         return ret;
@@ -892,8 +919,8 @@ void AudioHwDevice::disableVoiceCall()
     if (mWriters[kBTPortId]->isStreamRegistered(mVoiceULOutStream))
         mWriters[kBTPortId]->unregisterStream(mVoiceULOutStream);
 
-    if (mReaders[kCPUPortId]->isStreamRegistered(mVoiceULInStream))
-        mReaders[kCPUPortId]->unregisterStream(mVoiceULInStream);
+    if (mReaders[mMediaPortId]->isStreamRegistered(mVoiceULInStream))
+        mReaders[mMediaPortId]->unregisterStream(mVoiceULInStream);
 }
 
 int AudioHwDevice::enterVoiceCall()
@@ -1061,45 +1088,47 @@ AudioStreamIn* AudioHwDevice::openInputStream(audio_io_handle_t handle,
                                               audio_devices_t devices,
                                               struct audio_config *config)
 {
-    uint32_t port = 0;
+    uint32_t port = mMediaPortId;
+    uint32_t srcSlot0, srcSlot1;
     uint32_t channels = popcount(config->channel_mask);
 
     ALOGV("AudioHwDevice: openInputStream()");
 
-    uint32_t srcMask, dstMask;
     switch (devices) {
     case AUDIO_DEVICE_IN_BUILTIN_MIC:
     case AUDIO_DEVICE_IN_VOICE_CALL:
-        if (channels == 1) {
-            /* Mic is in slots 0&1 (mask = 0x03) on port 0, but AF wants
-             * only mono so take only one channel here */
-            srcMask = 0x01;
-            dstMask = 0x01;
+        if (usesJAMR3()) {
+            srcSlot0 = 2;
+            srcSlot1 = 2;
+        } else {
+            srcSlot0 = 0;
+            srcSlot1 = 1;
         }
-        else {
-            srcMask = 0x03;
-            dstMask = 0x03;
-        }
-        port = 0;
         break;
     case AUDIO_DEVICE_IN_BACK_MIC:
-        if (channels == 1) {
-            srcMask = 0x08;
-            dstMask = 0x01;
+        if (usesJAMR3()) {
+            srcSlot0 = 3;
+            srcSlot1 = 3;
+        } else {
+            srcSlot0 = 0;
+            srcSlot1 = 1;
         }
-        else {
-            ALOGE("AudioHwDevice: device 0x%08x only supports 1 channel",
-                  devices);
-            return NULL;
-        }
-        port = 1;
         break;
     default:
         ALOGE("AudioHwDevice: device 0x%08x is not supported", devices);
         return NULL;
     }
 
-    SlotMap slotMap(srcMask, dstMask);
+    SlotMap slotMap;
+    if (channels >= 1)
+        slotMap[0] = srcSlot0;
+    if (channels == 2)
+        slotMap[1] = srcSlot1;
+    if (channels > 2) {
+        ALOGE("AudioHwDevice: %u channels are not supported", channels);
+        return NULL;
+    }
+
     if (!slotMap.isValid()) {
         ALOGE("AudioHwDevice: failed to create slot map");
         return NULL;
@@ -1153,16 +1182,16 @@ AudioStreamOut* AudioHwDevice::openOutputStream(audio_io_handle_t handle,
     uint32_t destMask;
     switch (devices) {
     case AUDIO_DEVICE_OUT_SPEAKER:
-        port = 0;
+        port = mMediaPortId;
         destMask = 0x03;
         break;
     case AUDIO_DEVICE_OUT_WIRED_HEADPHONE:
     case AUDIO_DEVICE_OUT_WIRED_HEADSET:
-        port = 1;
+        port = kJAMR3PortId;
         destMask = 0x0c;
         break;
     case AUDIO_DEVICE_OUT_WIRED_HEADPHONE2:
-        port = 1;
+        port = kJAMR3PortId;
         destMask = 0x30;
         break;
     default:

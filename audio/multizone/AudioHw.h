@@ -214,6 +214,7 @@ class AudioHwDevice {
     typedef vector<PcmReader*> ReaderVect;
     typedef vector<PcmWriter*> WriterVect;
 
+    bool usesJAMR3() const { return mMediaPortId == kJAMR3PortId; }
     const char *getModeName(audio_mode_t mode) const;
     int enterVoiceCall();
     void leaveVoiceCall();
@@ -230,6 +231,7 @@ class AudioHwDevice {
     StreamOutSet mOutStreams;
     bool mMicMute;
     audio_mode_t mMode;
+    uint32_t mMediaPortId;
     wp<AudioStreamOut> mPrimaryStreamOut;
     tiaudioutils::MonoPipe *mULPipe;
     tiaudioutils::MonoPipe *mDLPipe;
