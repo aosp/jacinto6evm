@@ -195,7 +195,7 @@ int AudioStreamOut::standby()
 
 void AudioStreamOut::setVoiceCall(bool on)
 {
-    ALOGV("AudioStreamOut: standby()");
+    ALOGV("AudioStreamOut: setVoiceCall() %s", on ? "enter" : "leave");
 
     AutoMutex lock(mLock);
 
@@ -879,9 +879,9 @@ void AudioHwDevice::disableVoiceCall()
 
     sp<AudioStreamOut> outStream = mPrimaryStreamOut.promote();
     if (outStream != NULL) {
-        outStream->setVoiceCall(false);
         if (outStream->mWriter->isStreamRegistered(mVoiceDLOutStream))
             outStream->mWriter->unregisterStream(mVoiceDLOutStream);
+        outStream->setVoiceCall(false);
     } else {
         ALOGE("AudioHwDevice: primary output stream is not valid");
     }
