@@ -393,10 +393,9 @@ size_t AudioStreamIn::getBufferSize() const
 {
     size_t size;
 
-    /* Take resampling ratio into account and align to the nearest
-     * 16 frames as required by the AudioFlinger */
+    /* Take resampling ratio into account */
     size = (mParams.frameCount * mParams.sampleRate) / mReader->getParams().sampleRate;
-    size = ((size + 15) & ~15) * mParams.frameSize();
+    size = size * mParams.frameSize();
 
     ALOGVV("AudioStreamIn: getBufferSize() %u bytes", size);
 
@@ -1032,14 +1031,13 @@ size_t AudioHwDevice::getInputBufferSize(const struct audio_config *config) cons
     AutoMutex lock(mLock);
     size_t size;
 
-    /* Take resampling ratio into account and align to the nearest
-     * 16 frames as required by the AudioFlinger */
+    /* Take resampling ratio into account */
     /* Use port 0 for the calculation, since values for both ports are the same */
     uint32_t frames = mReaders[kCPUPortId]->getParams().frameCount;
     uint32_t rate = mReaders[kCPUPortId]->getParams().sampleRate;
 
     size = (frames * config->sample_rate) / rate;
-    size = ((size + 15) & ~15) * mReaders[kCPUPortId]->getParams().frameSize();
+    size = size * mReaders[kCPUPortId]->getParams().frameSize();
 
     ALOGV("AudioHwDevice: getInputBufferSize() %d bytes", size);
 
