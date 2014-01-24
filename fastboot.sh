@@ -130,7 +130,7 @@ if [ ! -e "${cacheimg}" ] ; then
 fi
 if [ ! -e "${recoveryimg}" ] ; then
   echo "Missing ${recoveryimg}"
-#  exit -1;
+  exit -1;
 fi
 if [ ! -e "${ipuimg}" ] ; then
   echo "Missing ${ipuimg}"
@@ -165,7 +165,7 @@ ${FASTBOOT} oem format
 echo "Flash android partitions"
 ${FASTBOOT} flash boot		${bootimg}
 ${FASTBOOT} flash environment	${environment}
-#${FASTBOOT} flash recovery	${recoveryimg}
+${FASTBOOT} flash recovery	${recoveryimg}
 ${FASTBOOT} flash system	${systemimg}
 ${FASTBOOT} flash ipu		${ipuimg}
 
