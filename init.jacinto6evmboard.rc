@@ -37,6 +37,17 @@ on post-fs-data
 #for Bluetooth HID
     chmod 0666 /dev/uhid
 
+# Create GPS folders and set its permissions
+    mkdir /data/gnss
+    chown system system /data/gnss
+    mkdir /data/gnss/logs/
+    mkdir /data/gnss/nvs/
+    mkdir /data/gnss/log_MD/
+    chown system system /data/gnss/logs/
+    chown system system /data/gnss/nvs/
+    chown system system /data/gnss/log_MD/
+    insmod /system/lib/modules/gps_drv.ko
+
 on boot
     chmod 0666 /dev/pvrsrvkm
 
@@ -174,3 +185,17 @@ service lad_dra7xx /system/bin/logwrapper /system/bin/lad_dra7xx
     group system
     disabled
     oneshot
+
+service devproxy /system/bin/devproxy
+    class main
+    disabled
+    oneshot
+    user system
+    group system
+
+service agnss_connect /system/bin/agnss_connect -p
+    class main
+    disabled
+    oneshot
+    user system
+    group system
