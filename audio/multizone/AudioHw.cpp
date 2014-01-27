@@ -735,6 +735,7 @@ uint32_t AudioHwDevice::getSupportedDevices() const
     devices = AUDIO_DEVICE_IN_BUILTIN_MIC |
               AUDIO_DEVICE_IN_BACK_MIC |
               AUDIO_DEVICE_IN_VOICE_CALL |
+              AUDIO_DEVICE_IN_ANLG_DOCK_HEADSET |
               AUDIO_DEVICE_OUT_SPEAKER |
               AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
               AUDIO_DEVICE_OUT_WIRED_HEADSET |
@@ -1113,6 +1114,14 @@ AudioStreamIn* AudioHwDevice::openInputStream(audio_io_handle_t handle,
             srcSlot0 = 0;
             srcSlot1 = 1;
         }
+        break;
+    case AUDIO_DEVICE_IN_ANLG_DOCK_HEADSET:
+        if (!usesJAMR3()) {
+            ALOGE("AudioHwDevice: device 0x%08x requires JAMR3", devices);
+            return NULL;
+        }
+        srcSlot0 = 0;
+        srcSlot1 = 1;
         break;
     default:
         ALOGE("AudioHwDevice: device 0x%08x is not supported", devices);
