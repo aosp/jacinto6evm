@@ -1014,6 +1014,9 @@ void AudioHwDevice::leaveVoiceCall()
     if (mVoiceULOutStream->isStarted())
         mVoiceULOutStream->stop();
 
+    mULPipe->flush();
+    mDLPipe->flush();
+
     disableVoiceCall();
 
     /* Reset the cabin volume for media */
