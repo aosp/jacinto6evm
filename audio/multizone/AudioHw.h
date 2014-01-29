@@ -204,6 +204,7 @@ class AudioHwDevice {
     static const float kVoiceDBMin = -24.0f;
     static const char *kCabinVolumeHP;
     static const char *kCabinVolumeLine;
+    static const char *kBTMode;
 
  protected:
     typedef set< sp<AudioStreamIn> > StreamInSet;
