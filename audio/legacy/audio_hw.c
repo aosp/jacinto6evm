@@ -94,6 +94,7 @@ struct j6_stream_out {
     struct pcm *pcm;
     pthread_mutex_t lock;
     bool standby;
+    int64_t written; /* total frames written, not cleared when entering standby */
 };
 
 
@@ -588,6 +589,8 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
         usleep(write_usecs); /* limits the rate of error messages */
     }
 
+    out->written += frames;
+
     pthread_mutex_unlock(&out->lock);
 
     return bytes;
@@ -613,6 +616,29 @@ static int out_get_next_write_timestamp(const struct audio_stream_out *stream,
                                         int64_t *timestamp)
 {
     return -EINVAL;
+}
+
+static int out_get_presentation_position(const struct audio_stream_out *stream,
+                                         uint64_t *frames, struct timespec *timestamp)
+{
+    struct j6_stream_out *out = (struct j6_stream_out *)(stream);
+    size_t avail;
+    int ret = -1;
+
+    pthread_mutex_lock(&out->lock);
+
+    if (pcm_get_htimestamp(out->pcm, &avail, timestamp) == 0) {
+        int64_t signed_frames = out->written - pcm_get_buffer_size(out->pcm) + avail;
+        /* It would be unusual for this value to be negative, but check just in case ... */
+        if (signed_frames >= 0) {
+            *frames = signed_frames;
+            ret = 0;
+        }
+    }
+
+    pthread_mutex_unlock(&out->lock);
+
+    return ret;
 }
 
 /** audio_stream_in implementation **/
@@ -959,10 +985,12 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     out->stream.write = out_write;
     out->stream.get_render_position = out_get_render_position;
     out->stream.get_next_write_timestamp = out_get_next_write_timestamp;
+    out->stream.get_presentation_position = out_get_presentation_position;
 
     out->dev = adev;
     out->standby = true;
     out->config = pcm_config_playback;
+    out->written = 0;
     adev->out = out;
 
     config->format = out_get_format(&out->stream.common);
