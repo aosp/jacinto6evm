@@ -48,6 +48,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SHARED_LIBRARIES := \
 	liblog \
 	libtiaudioutils \
+	libcutils \
 	libutils
 
 LOCAL_SHARED_LIBRARIES += libstlport

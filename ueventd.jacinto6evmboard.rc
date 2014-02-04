@@ -21,6 +21,11 @@
 # for Bluetooth
 /dev/hci_tty              0666   bluetooth bluetooth
 
+# Radio
+/dev/i2c-0                0660   system system
+/dev/i2c-1                0660   system system
+/dev/i2c-3                0660   system system
+
 #for GCX
 /dev/gcioctl              0666   system     system
 

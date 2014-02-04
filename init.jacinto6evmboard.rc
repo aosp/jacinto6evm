@@ -34,6 +34,8 @@ on post-fs-data
     setprop vold.post_fs_data_done 1
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp dhcp /data/misc/dhcp
+    mkdir /data/lad 0770 system system
+    mkdir /data/lad/LAD 0770 system system
 
 #for Bluetooth HID
     chmod 0666 /dev/uhid
@@ -177,3 +179,10 @@ service fuse_usb0 /system/bin/sdcard -u 1023 -g 1023 -d /mnt/media_rw/usb0 /stor
 service fuse_usb1 /system/bin/sdcard -u 1023 -g 1023 -d /mnt/media_rw/usb1 /storage/usb1
     class late_start
     disabled
+
+service lad_dra7xx /system/bin/logwrapper /system/bin/lad_dra7xx
+    class main
+    user system
+    group system
+    disabled
+    oneshot

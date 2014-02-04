@@ -116,6 +116,13 @@ PRODUCT_PACKAGES += \
 	mtpfuse \
 	fusermount
 
+# Radio
+PRODUCT_PACKAGES += \
+	HelloRadio \
+	lad_dra7xx \
+	libtiipc \
+	libtiipcutils
+
 # Can utilities
 PRODUCT_PACKAGES += \
 	libcan \
