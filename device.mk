@@ -81,7 +81,8 @@ PRODUCT_PACKAGES += \
 	camera_test \
 	ion_tiler_test \
 	iontest \
-	ion_ti_test2
+	ion_ti_test2 \
+	vpetest
 
 # Audio HAL modules
 PRODUCT_PACKAGES += audio.primary.jacinto6
