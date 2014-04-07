@@ -19,13 +19,13 @@
 BOARD_USES_GENERIC_AUDIO := true
 #USE_CAMERA_STUB := true
 #ENHANCED_DOMX := true
-#OMAP_ENHANCEMENT := true
+OMAP_ENHANCEMENT := true
 
 ifdef OMAP_ENHANCEMENT
 #OMAP_ENHANCEMENT_CPCAM := true
 #OMAP_ENHANCEMENT_S3D := true
 # Multi-zone audio (requires ro.com.ti.omap_multizone_audio, see device.mk)
-OMAP_MULTIZONE_AUDIO := true
+#OMAP_MULTIZONE_AUDIO := true
 endif
 
 TARGET_CPU_ABI := armeabi-v7a
