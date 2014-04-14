@@ -1,3 +1,2 @@
 wifi.interface=wlan0
-com.ti.omap_enhancement=true
 persist.hwc.primary.tv=1
