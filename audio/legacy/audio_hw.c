@@ -1143,6 +1143,8 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     in->requested_channels = popcount(config->channel_mask);
     in->hw_frame_size = in->config.channels * sizeof(int16_t);
     in->remix = NULL;
+    in->resampler = NULL;
+    in->buffer = NULL;
     adev->in = in;
 
     /* in-place stereo-to-mono remix since capture stream is stereo */
