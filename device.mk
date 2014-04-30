@@ -98,7 +98,7 @@ PRODUCT_PACKAGES += audio_policy.jacinto6
 
 PRODUCT_PACKAGES += \
 	audio_policy.conf \
-	dra7evm_paths.xml
+	mixer_paths.xml
 
 PRODUCT_PACKAGES += \
 	tinymix \

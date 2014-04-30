@@ -33,6 +33,7 @@ LOCAL_SRC_FILES := audio_hw.c
 
 LOCAL_C_INCLUDES += \
 	external/tinyalsa/include \
+	system/media/audio_route/include \
 	system/media/audio_utils/include \
 	system/media/audio_effects/include
 
@@ -40,6 +41,7 @@ LOCAL_SHARED_LIBRARIES := \
 	liblog \
 	libcutils \
 	libtinyalsa \
+	libaudioroute \
 	libaudioutils
 
 LOCAL_MODULE_TAGS := optional

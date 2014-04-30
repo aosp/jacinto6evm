@@ -33,6 +33,7 @@
 #include <cutils/properties.h>
 
 #include <audio_utils/resampler.h>
+#include <audio_route/audio_route.h>
 #include <system/audio.h>
 #include <hardware/hardware.h>
 #include <hardware/audio.h>
@@ -59,7 +60,7 @@ struct j6_audio_device {
     struct audio_hw_device device;
     struct j6_stream_in *in;
     struct j6_stream_out *out;
-    struct mixer *mixer;
+    struct audio_route *route;
     audio_devices_t in_device;
     audio_devices_t out_device;
     pthread_mutex_t lock;
@@ -141,148 +142,6 @@ struct pcm_config pcm_config_playback = {
     .stop_threshold  = PLAYBACK_BUFFER_SIZE,
     .avail_min       = PLAYBACK_PERIOD_SIZE,
 };
-
-/* Mixer control names */
-
-/* Capture */
-#define MIXER_PGA_CAPTURE_SWITCH        "PGA Capture Switch"
-#define MIXER_PGA_CAPTURE_VOLUME        "PGA Capture Volume"
-
-/* Capture gain (0dB, 59.5dB) step=0.5 */
-#define CAPTURE_DB_TO_VAL(x)            ((int)(2 * (float)(x)))
-
-/* Microphone specific */
-#define MIXER_LEFT_PGA_MIC3L_SWITCH     "Left PGA Mixer Mic3L Switch"
-#define MIXER_RIGHT_PGA_MIC3R_SWITCH    "Right PGA Mixer Mic3R Switch"
-
-/* Line-In specific */
-#define MIXER_LEFT_PGA_LINE1L_SWITCH    "Left PGA Mixer Line1L Switch"
-#define MIXER_RIGHT_PGA_LINE1R_SWITCH   "Right PGA Mixer Line1R Switch"
-#define MIXER_LEFT_LINE1L_MUX           "Left Line1L Mux"
-#define MIXER_RIGHT_LINE1L_MUX          "Right Line1L Mux"
-#define MIXER_LEFT_LINE1R_MUX           "Left Line1R Mux"
-#define MIXER_RIGHT_LINE1R_MUX          "Right Line1R Mux"
-#define MIXER_LINE_IN_SINGLE_ENDED      "single-ended"
-#define MIXER_LINE_IN_DIFFERENTIAL      "differential"
-
-/* Playback */
-#define MIXER_LEFT_DAC_MUX              "Left DAC Mux"
-#define MIXER_RIGHT_DAC_MUX             "Right DAC Mux"
-#define MIXER_MUX_DAC_L1                "DAC_L1"
-#define MIXER_MUX_DAC_R1                "DAC_R1"
-#define MIXER_PCM_PLAYBACK_VOLUME       "PCM Playback Volume"
-
- /* Playback gain (-63.5dB, 0dB) step=0.5dB */
-#define PLAYBACK_DB_TO_VAL(x)           ((int)(2 * ((float)(x) + 63.5)))
-
-/* Headphone specific */
-#define MIXER_HP_PLAYBACK_SWITCH        "HP Playback Switch"
-#define MIXER_LEFT_HP_DACL1_SWITCH      "Left HP Mixer DACL1 Switch"
-#define MIXER_RIGHT_HP_DACR1_SWITCH     "Right HP Mixer DACR1 Switch"
-#define HP_PLAYBACK_VOLUME              "HP DAC Playback Volume"
-#define HP_DRIVER_POWER_ON_TIME         "Output Driver Power-On time"
-#define HP_DRIVER_DELAY                 "200ms"
-
-/* Line-Out specific */
-#define MIXER_LINE_PLAYBACK_SWITCH      "Line Playback Switch"
-#define MIXER_LEFT_LINE_DACL1_SWITCH    "Left Line Mixer DACL1 Switch"
-#define MIXER_RIGHT_LINE_DACR1_SWITCH   "Right Line Mixer DACR1 Switch"
-#define LINE_PLAYBACK_VOLUME            "Line DAC Playback Volume"
-
- /* Output stage gain (-59.0dB, 0dB) step=0.5dB */
-#define OUTPUT_DB_TO_VAL(x)             ((int)(2 * ((float)(x) + 59.0)))
-
-struct route_setting {
-    char *ctl_name;
-    int intval;
-    char *strval;
-};
-
-#define RS_STR(ctrl, str) { .ctl_name = ctrl, .strval = str }
-#define RS_INT(ctrl, val) { .ctl_name = ctrl, .intval = val }
-#define RS_END            { .ctl_name = NULL, .strval = NULL }
-
-/* These are values that never change */
-static struct route_setting rs_defaults[] = {
-    /* Capture: Mic */
-    RS_INT(MIXER_LEFT_PGA_MIC3L_SWITCH, 1),
-    RS_INT(MIXER_RIGHT_PGA_MIC3R_SWITCH, 1),
-    RS_INT(MIXER_PGA_CAPTURE_SWITCH, 1),
-    RS_INT(MIXER_PGA_CAPTURE_VOLUME, CAPTURE_DB_TO_VAL(12)), /* 12dB */
-    RS_STR(MIXER_LEFT_LINE1L_MUX, MIXER_LINE_IN_SINGLE_ENDED),
-    RS_STR(MIXER_RIGHT_LINE1L_MUX, MIXER_LINE_IN_SINGLE_ENDED),
-    RS_STR(MIXER_LEFT_LINE1R_MUX, MIXER_LINE_IN_SINGLE_ENDED),
-    RS_STR(MIXER_RIGHT_LINE1R_MUX, MIXER_LINE_IN_SINGLE_ENDED),
-
-    /* Playback: Line-Out and Headphone */
-    RS_STR(MIXER_LEFT_DAC_MUX, MIXER_MUX_DAC_L1),
-    RS_STR(MIXER_RIGHT_DAC_MUX, MIXER_MUX_DAC_R1),
-    RS_INT(MIXER_PCM_PLAYBACK_VOLUME, PLAYBACK_DB_TO_VAL(0)), /* 0dB */
-
-    RS_INT(MIXER_LEFT_HP_DACL1_SWITCH, 1),
-    RS_INT(MIXER_RIGHT_HP_DACR1_SWITCH, 1),
-    RS_INT(MIXER_HP_PLAYBACK_SWITCH, 1),
-    RS_INT(HP_PLAYBACK_VOLUME, OUTPUT_DB_TO_VAL(0)), /* 0 dB */
-    RS_STR(HP_DRIVER_POWER_ON_TIME, HP_DRIVER_DELAY),
-
-    RS_INT(MIXER_LEFT_LINE_DACL1_SWITCH, 1),
-    RS_INT(MIXER_RIGHT_LINE_DACR1_SWITCH, 1),
-    RS_INT(MIXER_LINE_PLAYBACK_SWITCH, 1),
-    RS_INT(LINE_PLAYBACK_VOLUME, OUTPUT_DB_TO_VAL(0)), /* 0 dB */
-};
-
-/* Capture switch used for mic mute */
-static struct route_setting rs_capture[] = {
-    RS_INT(MIXER_PGA_CAPTURE_SWITCH, 1),
-    RS_END
-};
-
-/*
- * The enable flag when 0 makes the assumption that enums are disabled by
- * "Off" and integers/booleans by 0
- */
-static int set_route_by_array(struct mixer *mixer, struct route_setting *route,
-                              int enable)
-{
-    struct mixer_ctl *ctl;
-    unsigned int i, j;
-
-    ALOGV("set_route_by_array() route=%p %s", route, enable ? "enable" : "disable");
-
-    /* Go through the route array and set each value */
-    i = 0;
-    while (route[i].ctl_name) {
-        ctl = mixer_get_ctl_by_name(mixer, route[i].ctl_name);
-        if (!ctl) {
-            ALOGE("set_route_by_array() failed to get control '%s'", route[i].ctl_name);
-            return -EINVAL;
-        }
-
-        if (route[i].strval) {
-            ALOGV("set_route_by_array() control='%s' val='%s'",
-                  route[i].ctl_name, enable ? route[i].strval: "Off");
-
-            if (enable)
-                mixer_ctl_set_enum_by_string(ctl, route[i].strval);
-            else
-                mixer_ctl_set_enum_by_string(ctl, "Off");
-        } else {
-            ALOGV("set_route_by_array() control='%s' val=%d",
-                  route[i].ctl_name, route[i].intval);
-
-            /* This ensures multiple (i.e. stereo) values are set jointly */
-            for (j = 0; j < mixer_ctl_get_num_values(ctl); j++) {
-                if (enable)
-                    mixer_ctl_set_value(ctl, j, route[i].intval);
-                else
-                    mixer_ctl_set_value(ctl, j, 0);
-            }
-        }
-        i++;
-    }
-
-    return 0;
-}
 
 static int find_supported_card(void)
 {
@@ -924,6 +783,8 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
         ALOGE("in_read() failed to read audio data %d", ret);
         usleep(read_usecs); /* limits the rate of error messages */
         memset(buffer, 0, bytes);
+    } else if (adev->mic_mute) {
+        memset(buffer, 0, bytes);
     }
 
     pthread_mutex_unlock(&in->lock);
@@ -1070,11 +931,7 @@ static int adev_set_mic_mute(struct audio_hw_device *dev, bool state)
     struct j6_audio_device *adev = (struct j6_audio_device *)dev;
 
     ALOGV("adev_set_mic_mute() state=%s", state ? "mute" : "unmute");
-
-    pthread_mutex_lock(&adev->lock);
-    set_route_by_array(adev->mixer, rs_capture, !state);
     adev->mic_mute = state;
-    pthread_mutex_unlock(&adev->lock);
 
     return 0;
 }
@@ -1248,8 +1105,7 @@ static int adev_close(hw_device_t *device)
 
     ALOGI("adev_close()");
 
-    mixer_close(adev->mixer);
-    adev->mixer = NULL;
+    audio_route_free(adev->route);
     free(device);
 
     return 0;
@@ -1302,16 +1158,14 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->out_port = 0;
     adev->mic_mute = false;
 
-    adev->mixer = mixer_open(adev->card);
-    if (!adev->mixer) {
+    adev->route = audio_route_init(adev->card, NULL);
+    if (!adev->route) {
+        ALOGE("Unable to initialize audio routes");
         free(adev);
-        ALOGE("Unable to open the mixer, aborting.");
         return -EINVAL;
     }
 
     *device = &adev->device.common;
-
-    set_route_by_array(adev->mixer, rs_defaults, 1);
 
     return 0;
 }

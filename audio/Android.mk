@@ -14,6 +14,14 @@
 
 LOCAL_PATH := $(call my-dir)
 
+include $(CLEAR_VARS)
+LOCAL_MODULE := mixer_paths.xml
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := $(TARGET_OUT_ETC)
+LOCAL_SRC_FILES := $(LOCAL_MODULE)
+include $(BUILD_PREBUILT)
+
 # build multizone audio if the OMAP_MULTIZONE_AUDIO flag is set to true
 ifeq ($(OMAP_MULTIZONE_AUDIO),true)
 include $(CLEAR_VARS)
