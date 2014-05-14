@@ -57,38 +57,33 @@ else
         exit -1;
 fi
 
-# Skip board/silicon type detection for time being
 ## poll the board to find out its configuration
 #product=`${FASTBOOT} getvar product 2>&1 | grep product | awk '{print$2}'`
-#cpu=`${FASTBOOT} getvar cpu 2>&1         | grep cpu     | awk '{print$2}'`
+cpu=`${FASTBOOT} getvar cpu 2>&1         | grep cpu     | awk '{print$2}'`
 cputype=`${FASTBOOT} getvar secure 2>&1  | grep secure  | awk '{print$2}'`
-#cpurev=`${FASTBOOT} getvar cpurev 2>&1   | grep cpurev  | awk '{print$2}'`
-#
-## Panda board can not be flashed using fastboot
-#if [ "${product}" = "PANDA" ]; then
-#        errormsg "Panda board can not be flashed using fastboot"
-#fi
-#
-## Backwards compatibility for older bootloader versions
-#if [ "${product}" = "SDP4" ]; then
-#        product="Blaze"
-#fi
-#
+
+
 # Make EMU = HS
 if [ ${cputype} = "EMU" ]; then
         cputype="HS"
 fi
-
 # If fastboot does not support getvar default to GP
 if [ ${cputype} = "" ]; then
 	cputype="GP"
 fi
 
+# Based on cpu, decide the dtb to flash, default fall back to J6
+if [ ${cpu} = "J6ECO" ]; then
+        environment="${PRODUCT_OUT}dra72-evm.dtb"
+else
+        environment="${PRODUCT_OUT}dra7-evm.dtb"
+fi
+
+
 # Create the filename
 bootimg="${PRODUCT_OUT}boot.img"
 xloader="${PRODUCT_OUT}${cputype}_MLO"
 uboot="${PRODUCT_OUT}u-boot.img"
-environment="${PRODUCT_OUT}dra7-evm.dtb"
 systemimg="${PRODUCT_OUT}system.img"
 userdataimg="${PRODUCT_OUT}userdata.img"
 cacheimg="${PRODUCT_OUT}cache.img"
@@ -158,6 +153,7 @@ ${FASTBOOT} oem format
 
 echo "Flash android partitions"
 ${FASTBOOT} flash boot		${bootimg}
+echo "Flashing device tree ${environment}"
 ${FASTBOOT} flash environment	${environment}
 ${FASTBOOT} flash recovery	${recoveryimg}
 ${FASTBOOT} flash system	${systemimg}
