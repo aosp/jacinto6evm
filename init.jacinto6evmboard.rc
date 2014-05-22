@@ -65,6 +65,9 @@ on boot
     insmod /system/lib/modules/wl18xx.ko board_type=hdk
     insmod /system/lib/modules/wlcore_sdio.ko
 
+    # CMEM for Radio
+    insmod /system/lib/modules/cmemk.ko phys_start=0x95400000 phys_end=0x95800000 pools=15x262144 allowOverlap=1
+
 on fs
     mkdir /factory 0775 radio radio
     mount_all /fstab.jacinto6evmboard
