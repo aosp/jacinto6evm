@@ -75,4 +75,11 @@
 <ctl name="J3C Line Playback Switch" value="1" />
 <ctl name="J3C PCM Playback Volume" value="127" />
 
+<!-- Bluetooth -->
+<ctl name="Bluetooth Mode" value="Slave" />
+
+<path name="BT SCO Master">
+  <ctl name="Bluetooth Mode" value="Master" />
+</path>
+
 </mixer>
