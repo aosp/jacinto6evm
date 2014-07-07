@@ -82,10 +82,6 @@ on fs
 # take a wakelock on boot until PM is working
     write /sys/power/wake_lock hack
 
-# change permissions for Tiler driver
-    chmod 0777 /dev/tiler
-    chmod 0777 /dev/dmm
-
 # change permissions for ION driver
     chmod 0777 /dev/ion
 

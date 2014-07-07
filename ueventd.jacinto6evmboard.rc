@@ -3,17 +3,9 @@
 
 #for DSSCOMP
 /dev/dsscomp              0666   system     system
-/dev/tiler                0666   system     system
 
 # for IPC3.x
 /dev/rpmsg-dce            0660   media      media
-
-#for SYSLINK
-/dev/rpmsg-omx0 	  0660 	 drmrpc     drmrpc
-/dev/rpmsg-omx1 	  0660   drmrpc     drmrpc
-/dev/rproc_user 	  0660   drmrpc     drmrpc
-/dev/tf_driver 		  0660   drmrpc     drmrpc
-/dev/tf_ctrl 		  0660   drmrpc     drmrpc
 
 # V4L camera
 /dev/video*               0660   system    camera
@@ -21,11 +13,13 @@
 # for Bluetooth
 /dev/hci_tty              0666   bluetooth bluetooth
 
-# Radio
+# Radio Tuners
 /dev/i2c-0                0660   system system
 /dev/i2c-1                0660   system system
 /dev/i2c-3                0660   system system
 /dev/i2c-4                0660   system system
+
+# cmem
 /dev/cmem                 0660   system system
 
 #for GCX

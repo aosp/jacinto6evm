@@ -105,16 +105,6 @@ PRODUCT_PACKAGES += \
 	tinyplay \
 	tinycap
 
-PRODUCT_PACKAGES += \
-	boardidentity \
-	libboardidentity \
-	libboard_idJNI \
-	Board_id
-
-# MultiDisplay
-PRODUCT_PACKAGES += \
-	TIMultiDisplay
-
 # Radio
 PRODUCT_PACKAGES += \
 	HelloRadio \
@@ -159,9 +149,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 $(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
 $(call inherit-product-if-exists, hardware/ti/omap4xxx/jacinto6.mk)
 $(call inherit-product-if-exists, hardware/ti/wpan/ti-wpan-products.mk)
-$(call inherit-product-if-exists, vendor/ti/omap5sevm/device-vendor.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/jacinto6/ti-jacinto6-vendor.mk)
-#$(call inherit-product-if-exists, device/ti/common-open/s3d/s3d-products.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/jacinto6/ducati-full_jacinto6evm.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/wl12xx/wlan/wl12xx-wlan-fw-products.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/wl12xx/wpan/wl12xx-wpan-fw-products.mk)
