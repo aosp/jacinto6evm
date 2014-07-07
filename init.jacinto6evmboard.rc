@@ -113,17 +113,6 @@ service uim /system/bin/uim-sysfs
 service sdcard /system/bin/sdcard -u 1023 -g 1023 -l /data/media /mnt/shell/emulated
     class late_start
 
-service mtpfuse /system/bin/mtpfuse /storage/sdcard0/mtpfs -o allow_other
-    class main
-    disabled
-    oneshot
-
-service fusermount /system/bin/fusermount -u -z /sdcard/mtpfs
-    class main
-    disabled
-    user root
-    oneshot
-
 service p2p_supplicant /system/bin/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf -N \
     -ip2p0 -Dnl80211 -c/data/misc/wifi/p2p_supplicant.conf \
