@@ -74,3 +74,7 @@ ifeq ($(OMAP_MULTIZONE_AUDIO),true)
 COMMON_GLOBAL_CFLAGS += -DOMAP_MULTIZONE_AUDIO
 endif
 
+BOARD_SEPOLICY_DIRS := device/ti/jacinto6evm/sepolicy
+BOARD_SEPOLICY_UNION := \
+        healthd.te
+
