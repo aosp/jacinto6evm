@@ -2,8 +2,10 @@
 
 usage ()
 {
-	echo "Usage: %fastboot.sh ";
+	echo "Usage: sudo fastboot.sh <options>";
 	echo "options:";
+	echo "  --help Show this message and exit"
+	echo "  --revg Flashes the dtb required for Rev-G J6 EVm which has 10inch panel";
 	exit 1;
 }
 
@@ -77,6 +79,11 @@ if [ ${cpu} = "J6ECO" ]; then
         environment="${PRODUCT_OUT}dra72-evm.dtb"
 else
         environment="${PRODUCT_OUT}dra7-evm.dtb"
+fi
+
+# Special case to flash dtb for 10" panel board
+if [ "$1" = "--revg" ] && [ ${cpu} = "J6"  ]; then
+        environment="${PRODUCT_OUT}dra7-evm-g.dtb"
 fi
 
 
