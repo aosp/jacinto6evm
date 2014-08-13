@@ -30,4 +30,6 @@
     <feature name="android.hardware.bluetooth" />
     <feature name="android.software.app_widgets" />
     <feature name="android.software.home_screen" />
+    <!-- Feature to specify if the device supports adding device admins. -->
+    <feature name="android.software.device_admin" />
 </permissions>
