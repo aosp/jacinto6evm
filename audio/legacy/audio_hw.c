@@ -1393,7 +1393,7 @@ static int adev_set_mode(struct audio_hw_device *dev, audio_mode_t mode)
             ALOGE("adev_set_mode() failed to initialize voice call %d", ret);
             goto out;
         }
-    } else {
+    } else if (adev->mode == AUDIO_MODE_IN_CALL) {
         leave_voice_call(adev);
     }
 
