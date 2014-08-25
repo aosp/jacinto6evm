@@ -66,12 +66,15 @@ cputype=`${FASTBOOT} getvar secure 2>&1  | grep secure  | awk '{print$2}'`
 
 
 # Make EMU = HS
-if [ ${cputype} = "EMU" ]; then
+if [ ${cputype} = "EMU" ] || [ ${cputype} = "HS" ]; then
         cputype="HS"
+	xloader="${PRODUCT_OUT}${cputype}_QSPI_MLO"
 fi
+
 # If fastboot does not support getvar default to GP
 if [ ${cputype} = "" ]; then
 	cputype="GP"
+	xloader="${PRODUCT_OUT}${cputype}_MLO"
 fi
 
 # Based on cpu, decide the dtb to flash, default fall back to J6
@@ -89,7 +92,6 @@ fi
 
 # Create the filename
 bootimg="${PRODUCT_OUT}boot.img"
-xloader="${PRODUCT_OUT}${cputype}_MLO"
 uboot="${PRODUCT_OUT}u-boot.img"
 systemimg="${PRODUCT_OUT}system.img"
 userdataimg="${PRODUCT_OUT}userdata.img"
