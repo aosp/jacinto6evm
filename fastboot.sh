@@ -72,7 +72,7 @@ if [ ${cputype} = "EMU" ] || [ ${cputype} = "HS" ]; then
 fi
 
 # If fastboot does not support getvar default to GP
-if [ ${cputype} = "" ]; then
+if [ ${cputype} = "" ] || [ ${cputype} = "GP" ]; then
 	cputype="GP"
 	xloader="${PRODUCT_OUT}${cputype}_MLO"
 fi
