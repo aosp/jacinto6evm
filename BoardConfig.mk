@@ -18,7 +18,7 @@
 # by BoardConfigVendor.mk
 BOARD_USES_GENERIC_AUDIO := true
 #USE_CAMERA_STUB := true
-OMAP_ENHANCEMENT := true
+#OMAP_ENHANCEMENT := true
 
 ifeq ($(OMAP_ENHANCEMENT),true)
 COMMON_GLOBAL_CFLAGS += -DOMAP_ENHANCEMENT
@@ -60,7 +60,7 @@ TARGET_RECOVERY_PIXEL_FORMAT := "RGB565"
 TARGET_RELEASETOOLS_EXTENSIONS := device/ti/jacinto6evm
 
 # Connectivity - Wi-Fi
-USES_TI_MAC80211 := true
+#USES_TI_MAC80211 := true
 ifeq ($(USES_TI_MAC80211),true)
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
 WPA_SUPPLICANT_VERSION      := VER_0_8_X_TI
@@ -74,7 +74,7 @@ ifeq ($(OMAP_MULTIZONE_AUDIO),true)
 COMMON_GLOBAL_CFLAGS += -DOMAP_MULTIZONE_AUDIO
 endif
 
-BOARD_SEPOLICY_DIRS := device/ti/jacinto6evm/sepolicy
-BOARD_SEPOLICY_UNION := \
-        healthd.te
+#BOARD_SEPOLICY_DIRS := device/ti/jacinto6evm/sepolicy
+#BOARD_SEPOLICY_UNION := \
+#        healthd.te
 
