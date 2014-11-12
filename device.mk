@@ -148,7 +148,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 	ro.com.ti.omap_multizone_audio=true
 
 $(call inherit-product, frameworks/native/build/tablet-7in-hdpi-1024-dalvik-heap.mk)
-$(call inherit-product-if-exists, hardware/ti/omap4xxx/jacinto6.mk)
+$(call inherit-product-if-exists, hardware/ti/dra7xx/jacinto6.mk)
 $(call inherit-product-if-exists, hardware/ti/wpan/ti-wpan-products.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/jacinto6/ti-jacinto6-vendor.mk)
 $(call inherit-product-if-exists, device/ti/proprietary-open/jacinto6/ducati-full_jacinto6evm.mk)
