@@ -79,16 +79,10 @@ fi
 
 # Based on cpu, decide the dtb to flash, default fall back to J6
 if [ ${cpu} = "J6ECO" ]; then
-        environment="${PRODUCT_OUT}dra72-evm.dtb"
+        environment="${PRODUCT_OUT}dra72-evm-lcd10.dtb"
 else
-        environment="${PRODUCT_OUT}dra7-evm.dtb"
+        environment="${PRODUCT_OUT}dra7-evm-lcd10.dtb"
 fi
-
-# Special case to flash dtb for 10" panel board
-if [ "$1" = "--revg" ] && [ ${cpu} = "J6"  ]; then
-        environment="${PRODUCT_OUT}dra7-evm-g.dtb"
-fi
-
 
 # Create the filename
 bootimg="${PRODUCT_OUT}boot.img"

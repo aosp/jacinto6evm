@@ -83,7 +83,8 @@ PRODUCT_PACKAGES += \
 	ion_tiler_test \
 	iontest \
 	ion_ti_test2 \
-	vpetest
+	vpetest \
+	libdrm
 
 # Audio HAL modules
 PRODUCT_PACKAGES += audio.primary.jacinto6
