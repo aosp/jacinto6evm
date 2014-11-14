@@ -81,7 +81,7 @@ fi
 if [ ${cpu} = "J6ECO" ]; then
         environment="${PRODUCT_OUT}dra72-evm-lcd10.dtb"
 else
-        environment="${PRODUCT_OUT}dra7-evm-lcd10.dtb"
+        environment="${PRODUCT_OUT}dra7-evm-lcd7.dtb"
 fi
 
 # Create the filename
