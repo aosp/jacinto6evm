@@ -19,4 +19,10 @@
 
 #define BTM_DEF_LOCAL_NAME   "Jacinto6"
 
+/* Handsfree device */
+#define BTA_DM_COD {0x20, 0x04, 0x08}
+
+/* Enable A2DP sink */
+#define BTA_AV_SINK_INCLUDED TRUE
+
 #endif
