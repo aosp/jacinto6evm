@@ -153,17 +153,17 @@ static const char *supported_bt_cards[] = {
                                         AUDIO_DEVICE_OUT_DEFAULT)
 
 #define CAPTURE_SAMPLE_RATE             44100
-#define CAPTURE_PERIOD_SIZE             960
+#define CAPTURE_PERIOD_SIZE             256
 #define CAPTURE_PERIOD_COUNT            4
 #define CAPTURE_BUFFER_SIZE             (CAPTURE_PERIOD_SIZE * CAPTURE_PERIOD_COUNT)
 
 #define PLAYBACK_SAMPLE_RATE            44100
-#define PLAYBACK_PERIOD_SIZE            960
+#define PLAYBACK_PERIOD_SIZE            256
 #define PLAYBACK_PERIOD_COUNT           4
 #define PLAYBACK_BUFFER_SIZE            (PLAYBACK_PERIOD_SIZE * PLAYBACK_PERIOD_COUNT)
 
 #define BT_SAMPLE_RATE                  8000
-#define BT_PERIOD_SIZE                  160
+#define BT_PERIOD_SIZE                  80
 #define BT_PERIOD_COUNT                 4
 #define BT_BUFFER_SIZE                  (BT_PERIOD_SIZE * BT_PERIOD_COUNT)
 
