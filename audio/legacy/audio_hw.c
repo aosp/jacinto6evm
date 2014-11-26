@@ -263,7 +263,7 @@ static size_t get_input_buffer_size(uint32_t sample_rate, int format, int channe
     size = (pcm_config_capture.period_size * sample_rate) / pcm_config_capture.rate;
     size = ((size + 15) / 16) * 16;
 
-    return size * channel_count * sizeof(int16_t);
+    return size * channel_count * audio_bytes_per_sample(format);
 }
 
 /*
@@ -698,8 +698,9 @@ static int out_set_sample_rate(struct audio_stream *stream, uint32_t rate)
 
 static size_t out_get_buffer_size(const struct audio_stream *stream)
 {
+    const struct audio_stream_out *s = (const struct audio_stream_out *)stream;
     uint32_t frames = ((PLAYBACK_PERIOD_SIZE + 15) / 16) * 16;
-    size_t bytes = frames * audio_stream_frame_size(stream);
+    size_t bytes = frames * audio_stream_out_frame_size(s);
 
     ALOGVV("out_get_buffer_size() stream=%p frames=%u bytes=%u", stream, frames, bytes);
 
@@ -832,10 +833,11 @@ static int out_set_volume(struct audio_stream_out *stream, float left,
 static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
                          size_t bytes)
 {
+    const struct audio_stream_out *s = (const struct audio_stream_out *)stream;
     struct j6_stream_out *out = (struct j6_stream_out *)(stream);
     struct j6_audio_device *adev = out->dev;
     struct timespec now;
-    const size_t frame_size = audio_stream_frame_size(&stream->common);
+    const size_t frame_size = audio_stream_out_frame_size(s);
     const size_t frames = bytes / frame_size;
     uint32_t rate = out->config.rate;
     uint32_t write_usecs = frames * 1000000 / rate;
@@ -1157,13 +1159,14 @@ static void release_buffer(struct resampler_buffer_provider *buffer_provider,
  */
 static ssize_t read_frames(struct j6_stream_in *in, void *buffer, ssize_t frames)
 {
+    const struct audio_stream_in *s = (const struct audio_stream_in *)in;
     ssize_t frames_wr = 0;
     size_t frame_size;
 
     ALOGVV("read_frames() stream=%p frames=%u", in, frames);
 
     if (in->remix)
-        frame_size = audio_stream_frame_size(&in->stream.common);
+        frame_size = audio_stream_in_frame_size(s);
     else
         frame_size = in->hw_frame_size;
 
@@ -1187,9 +1190,10 @@ static ssize_t read_frames(struct j6_stream_in *in, void *buffer, ssize_t frames
 static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
                        size_t bytes)
 {
+    const struct audio_stream_in *s = (const struct audio_stream_in *)stream;
     struct j6_stream_in *in = (struct j6_stream_in *)(stream);
     struct j6_audio_device *adev = in->dev;
-    const size_t frame_size = audio_stream_frame_size(&stream->common);
+    const size_t frame_size = audio_stream_in_frame_size(stream);
     const size_t frames = bytes / frame_size;
     uint32_t rate = in_get_sample_rate(&stream->common);
     uint32_t read_usecs = frames * 1000000 / rate;
@@ -1571,19 +1575,6 @@ static int adev_dump(const audio_hw_device_t *device, int fd)
     return 0;
 }
 
-/*
- * should not be needed for API version 2.0 but AudioFlinger uses it to find
- * suitable hw device, so we keep it
- */
-static uint32_t adev_get_supported_devices(const struct audio_hw_device *dev)
-{
-    uint32_t devices = SUPPORTED_IN_DEVICES | SUPPORTED_OUT_DEVICES;
-
-    ALOGV("adev_get_supported_devices() devices=0x%08x", devices);
-
-    return devices;
-}
-
 static int adev_close(hw_device_t *device)
 {
     struct j6_audio_device *adev = (struct j6_audio_device *)device;
@@ -1617,7 +1608,6 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->device.common.module = (struct hw_module_t *) module;
     adev->device.common.close = adev_close;
 
-    adev->device.get_supported_devices = adev_get_supported_devices;
     adev->device.init_check = adev_init_check;
     adev->device.set_voice_volume = adev_set_voice_volume;
     adev->device.set_master_volume = adev_set_master_volume;
