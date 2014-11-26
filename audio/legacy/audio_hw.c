@@ -986,7 +986,7 @@ static size_t in_get_buffer_size(const struct audio_stream *stream)
 static audio_channel_mask_t in_get_channels(const struct audio_stream *stream)
 {
     const struct j6_stream_in *in = (const struct j6_stream_in *)(stream);
-    audio_channel_mask_t channels = audio_channel_out_mask_from_count(in->requested_channels);
+    audio_channel_mask_t channels = audio_channel_in_mask_from_count(in->requested_channels);
 
     ALOGVV("in_get_channels() stream=%p channels=%u", in, in->requested_channels);
 
