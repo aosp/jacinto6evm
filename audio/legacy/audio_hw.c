@@ -565,9 +565,6 @@ static int enter_voice_call(struct j6_audio_device *adev)
 
     ALOGI("enter_voice_call() entering bluetooth voice call");
 
-    audio_route_apply_path(adev->route, "BT SCO Master");
-    audio_route_update_mixer(adev->route);
-
     /* Let the primary output switch to a dummy sink */
     if (adev->out)
         do_out_standby(adev->out);
@@ -580,7 +577,7 @@ static int enter_voice_call(struct j6_audio_device *adev)
     ret = voice_stream_init(&voice->ul, adev->in_port, adev->bt_port, false);
     if (ret) {
         ALOGE("enter_voice_call() failed to init uplink %d", ret);
-        goto err_ul_init;
+        return ret;
     }
 
     /* Downlink: BT (8kHz) -> HP/Spk (44.1kHz) */
@@ -620,9 +617,6 @@ static int enter_voice_call(struct j6_audio_device *adev)
     voice_stream_exit(&voice->ul);
  err_dl_init:
     voice_stream_exit(&voice->dl);
- err_ul_init:
-    audio_route_reset_path(adev->route, "BT SCO Master");
-    audio_route_update_mixer(adev->route);
 
     return ret;
 }
@@ -638,15 +632,6 @@ static void leave_voice_call(struct j6_audio_device *adev)
 
     adev->in_call = false;
 
-    /*
-     * The PCM ports used for Bluetooth are slaves and they can lose the
-     * BCLK and FSYNC while still active. That leads to blocking read() and
-     * write() calls, which is prevented by switching the clock source to
-     * an internal one and explicitly stopping both ports for the new source
-     * to take effect at kernel level
-     */
-    audio_route_reset_path(adev->route, "BT SCO Master");
-    audio_route_update_mixer(adev->route);
     if (ul->pcm_out)
         pcm_stop(ul->pcm_out);
     if (dl->pcm_in)
