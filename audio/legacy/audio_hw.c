@@ -309,7 +309,7 @@ static int setup_stereo_to_mono_input_remix(struct j6_stream_in *in)
 {
     ALOGV("setup_stereo_to_mono_input_remix() stream=%p", in);
 
-    struct buffer_remix *br = (struct buffer_remix *)malloc(sizeof(struct buffer_remix));
+    struct buffer_remix *br = (struct buffer_remix *)calloc(1, sizeof(struct buffer_remix));
     if (!br)
         return -ENOMEM;
 
@@ -349,7 +349,7 @@ static int setup_mono_input_remix(struct j6_voice_stream *stream)
 {
     ALOGV("setup_mono_input_remix() %s stream", stream->name);
 
-    struct buffer_remix *br = (struct buffer_remix *)malloc(sizeof(struct buffer_remix));
+    struct buffer_remix *br = (struct buffer_remix *)calloc(1, sizeof(struct buffer_remix));
     if (!br)
         return -ENOMEM;
 
@@ -1261,7 +1261,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     struct j6_audio_device *adev = (struct j6_audio_device *)dev;
     struct j6_stream_out *out;
 
-    out = (struct j6_stream_out *)malloc(sizeof(struct j6_stream_out));
+    out = (struct j6_stream_out *)calloc(1, sizeof(struct j6_stream_out));
     if (!out)
         return -ENOMEM;
 
@@ -1442,7 +1442,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     struct j6_stream_in *in;
     int ret;
 
-    in = (struct j6_stream_in *)malloc(sizeof(struct j6_stream_in));
+    in = (struct j6_stream_in *)calloc(1, sizeof(struct j6_stream_in));
     if (!in)
         return -ENOMEM;
 
@@ -1582,7 +1582,7 @@ static int adev_open(const hw_module_t* module, const char* name,
     if (strcmp(name, AUDIO_HARDWARE_INTERFACE) != 0)
         return -EINVAL;
 
-    adev = (struct j6_audio_device*)malloc(sizeof(struct j6_audio_device));
+    adev = (struct j6_audio_device*)calloc(1, sizeof(struct j6_audio_device));
     if (!adev)
         return -ENOMEM;
 
