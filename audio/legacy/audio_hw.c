@@ -97,6 +97,7 @@ struct j6_audio_device {
     unsigned int card;
     unsigned int in_port;
     unsigned int out_port;
+    unsigned int bt_card;
     unsigned int bt_port;
     bool mic_mute;
     bool in_call;
@@ -133,10 +134,14 @@ struct j6_stream_out {
 };
 
 
-static const char *supported_cards[] = {
+static const char *supported_media_cards[] = {
     "dra7evm",
     "VayuEVM",
     "DRA7xxEVM",
+};
+
+static const char *supported_bt_cards[] = {
+    "DRA7xxWiLink",
 };
 
 #define SUPPORTED_IN_DEVICES           (AUDIO_DEVICE_IN_BUILTIN_MIC | \
@@ -204,7 +209,7 @@ struct pcm_config pcm_config_bt_out = {
     .avail_min       = BT_PERIOD_SIZE,
 };
 
-static int find_supported_card(void)
+static int find_card_index(const char *supported_cards[], int num_supported)
 {
     char name[256] = "";
     int card = 0;
@@ -218,7 +223,7 @@ static int find_supported_card(void)
         if (ret)
             break;
 
-        for (i = 0; i < ARRAY_SIZE(supported_cards); ++i) {
+        for (i = 0; i < num_supported; ++i) {
             if (supported_cards[i] && !strcmp(name, supported_cards[i])) {
                 ALOGV("Supported card '%s' found at %d", name, card);
                 found = 1;
@@ -498,7 +503,9 @@ static void voice_stream_exit(struct j6_voice_stream *stream)
 }
 
 static int voice_stream_init(struct j6_voice_stream *stream,
+                             unsigned int in_card,
                              unsigned int in_port,
+                             unsigned int out_card,
                              unsigned int out_port,
                              bool needs_mono_remix)
 {
@@ -518,8 +525,8 @@ static int voice_stream_init(struct j6_voice_stream *stream,
         return ret;
     }
 
-    stream->pcm_in = pcm_open(adev->card, in_port, PCM_IN, &stream->in_config);
-    stream->pcm_out = pcm_open(adev->card, out_port, PCM_OUT, &stream->out_config);
+    stream->pcm_in = pcm_open(in_card, in_port, PCM_IN, &stream->in_config);
+    stream->pcm_out = pcm_open(out_card, out_port, PCM_OUT, &stream->out_config);
 
     if (!pcm_is_ready(stream->pcm_in) || !pcm_is_ready(stream->pcm_out)) {
         ALOGE("voice_stream_init() failed to open pcm %s devices", stream->name);
@@ -574,7 +581,8 @@ static int enter_voice_call(struct j6_audio_device *adev)
     voice->ul.in_config = pcm_config_capture;
     voice->ul.out_config = pcm_config_bt_out;
     voice->ul.dev = adev;
-    ret = voice_stream_init(&voice->ul, adev->in_port, adev->bt_port, false);
+    ret = voice_stream_init(&voice->ul, adev->card, adev->in_port,
+                            adev->bt_card, adev->bt_port, false);
     if (ret) {
         ALOGE("enter_voice_call() failed to init uplink %d", ret);
         return ret;
@@ -585,7 +593,8 @@ static int enter_voice_call(struct j6_audio_device *adev)
     voice->dl.in_config = pcm_config_bt_in;
     voice->dl.out_config = pcm_config_playback;
     voice->dl.dev = adev;
-    ret = voice_stream_init(&voice->dl, adev->bt_port, adev->out_port, true);
+    ret = voice_stream_init(&voice->dl, adev->bt_card, adev->bt_port,
+                            adev->card, adev->out_port, true);
     if (ret) {
         ALOGE("enter_voice_call() failed to init downlink %d", ret);
         goto err_dl_init;
@@ -1613,10 +1622,17 @@ static int adev_open(const hw_module_t* module, const char* name,
 
     adev->in_device = AUDIO_DEVICE_IN_BUILTIN_MIC;
     adev->out_device = AUDIO_DEVICE_OUT_SPEAKER;
-    adev->card = find_supported_card();
+    adev->card = find_card_index(supported_media_cards,
+                                 ARRAY_SIZE(supported_media_cards));
     adev->in_port = 0;
     adev->out_port = 0;
-    adev->bt_port = 2;
+    ALOGI("Media card is hw:%d\n", adev->card);
+
+    adev->bt_card = find_card_index(supported_bt_cards,
+                                    ARRAY_SIZE(supported_bt_cards));
+    adev->bt_port = 0;
+    ALOGI("Bluetooth SCO card is hw:%d\n", adev->bt_card);
+
     adev->mic_mute = false;
     adev->in_call = false;
     adev->mode = AUDIO_MODE_NORMAL;
