@@ -418,7 +418,6 @@ static void *voice_thread_func(void *arg)
 {
     struct j6_voice_stream *stream = (struct j6_voice_stream *)arg;
     struct j6_audio_device *adev = stream->dev;
-    struct timespec now;
     size_t frames = stream->out_frames;
     uint32_t periods = 0;
     uint32_t avail;
@@ -437,8 +436,8 @@ static void *voice_thread_func(void *arg)
                                                           stream->out_buffer,
                                                           &frames);
             } else {
-                ret = pcm_get_htimestamp(stream->pcm_in, &avail, &now);
-                if (!ret && (avail > 0)) {
+                avail = pcm_avail_update(stream->pcm_in);
+                if (avail > 0) {
                     in_steady = true;
                     continue;
                 }
