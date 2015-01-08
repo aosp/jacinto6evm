@@ -524,8 +524,12 @@ static int voice_stream_init(struct j6_voice_stream *stream,
         return ret;
     }
 
-    stream->pcm_in = pcm_open(in_card, in_port, PCM_IN, &stream->in_config);
-    stream->pcm_out = pcm_open(out_card, out_port, PCM_OUT, &stream->out_config);
+    stream->pcm_in = pcm_open(in_card, in_port,
+                              PCM_IN | PCM_MONOTONIC,
+                              &stream->in_config);
+    stream->pcm_out = pcm_open(out_card, out_port,
+                               PCM_OUT | PCM_MONOTONIC,
+                               &stream->out_config);
 
     if (!pcm_is_ready(stream->pcm_in) || !pcm_is_ready(stream->pcm_out)) {
         ALOGE("voice_stream_init() failed to open pcm %s devices", stream->name);
@@ -848,7 +852,9 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
             select_output_device(adev);
 
             ALOGI("out_write() open card %u port %u", adev->card, adev->out_port);
-            out->pcm = pcm_open(adev->card, adev->out_port, PCM_OUT, &out->config);
+            out->pcm = pcm_open(adev->card, adev->out_port,
+                                PCM_OUT | PCM_MONOTONIC,
+                                &out->config);
             if (!pcm_is_ready(out->pcm)) {
                 ALOGE("out_write() failed to open pcm out: %s", pcm_get_error(out->pcm));
                 pcm_close(out->pcm);
@@ -932,7 +938,7 @@ static int out_get_presentation_position(const struct audio_stream_out *stream,
             signed_frames = out->written - pcm_get_buffer_size(out->pcm) + avail;
         }
     } else {
-        clock_gettime(CLOCK_REALTIME, timestamp);
+        clock_gettime(CLOCK_MONOTONIC, timestamp);
         signed_frames = out->written +
             (time_diff(*timestamp, out->last) * out->config.rate) / 1000000;
     }
@@ -1202,7 +1208,9 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
         select_input_device(adev);
 
         ALOGI("in_read() open card %u port %u", adev->card, adev->in_port);
-        in->pcm = pcm_open(adev->card, adev->in_port, PCM_IN, &in->config);
+        in->pcm = pcm_open(adev->card, adev->in_port,
+                           PCM_IN | PCM_MONOTONIC,
+                           &in->config);
         if (!pcm_is_ready(in->pcm)) {
             ALOGE("in_read() failed to open pcm in: %s", pcm_get_error(in->pcm));
             pcm_close(in->pcm);
