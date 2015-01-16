@@ -71,6 +71,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # WI-Fi
 PRODUCT_PACKAGES += \
+	wpa_supplicant \
+	wpa_supplicant.conf \
+	libwpa_client \
+	hostapd \
 	hostapd.conf \
 	wifical.sh \
 	TQS_D_1.7.ini \
