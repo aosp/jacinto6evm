@@ -5,7 +5,6 @@ usage ()
 	echo "Usage: sudo fastboot.sh <options>";
 	echo "options:";
 	echo "  --help Show this message and exit"
-	echo "  --revg Flashes the dtb required for Rev-G J6 EVm which has 10inch panel";
 	exit 1;
 }
 
@@ -81,7 +80,7 @@ fi
 if [ ${cpu} = "J6ECO" ]; then
         environment="${PRODUCT_OUT}dra72-evm-lcd10.dtb"
 else
-        environment="${PRODUCT_OUT}dra7-evm-lcd7.dtb"
+        environment="${PRODUCT_OUT}dra7-evm-lcd10.dtb"
 fi
 
 # Create the filename
