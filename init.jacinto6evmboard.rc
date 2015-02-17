@@ -37,6 +37,9 @@ on post-fs-data
     mkdir /data/lad 0770 system system
     mkdir /data/lad/LAD 0770 system system
 
+# enabling thermal zone for mpu
+    write /sys/class/thermal/thermal_zone0/mode enabled
+
 #for Bluetooth HID
     chmod 0666 /dev/uhid
 
