@@ -76,6 +76,7 @@ PRODUCT_PACKAGES += \
 	libwpa_client \
 	hostapd \
 	hostapd.conf \
+	dhcpcd.conf \
 	wifical.sh \
 	TQS_D_1.7.ini \
 	TQS_D_1.7_127x.ini \
