@@ -27,5 +27,11 @@
         <Quirk name="requires-allocate-on-output-ports"/>
         </MediaCodec>
     </Decoders>
+    <Encoders>
+        <MediaCodec name="OMX.TI.DUCATI1.VIDEO.H264E" type="video/avc" >
+            <Quirk name="requires-allocate-on-input-ports" />
+            <Quirk name="requires-allocate-on-output-ports" />
+        </MediaCodec>
+    </Encoders>
     <Include href="media_codecs_google_video.xml" />
 </MediaCodecs>
